@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "181803179147",
+    "project_id": "stopor-f035c",
+    "storage_bucket": "stopor-f035c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:181803179147:android:caf461366f3aa42c6fc88e",
+        "android_client_info": {
+          "package_name": "speedypleath.stopor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "181803179147-of32m4ps0iihsc9eu9rg55kuno7shn05.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDQyfqUzrEgjtkxlw3OveeBhsf8B_y5y-M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "181803179147-of32m4ps0iihsc9eu9rg55kuno7shn05.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
