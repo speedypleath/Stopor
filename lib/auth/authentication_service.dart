@@ -1,9 +1,12 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:stopor/database/database_service.dart';
+import 'package:http/http.dart' as http;
 
 class AuthenticationService {
   final FirebaseAuth _firebaseAuth;
@@ -17,7 +20,8 @@ class AuthenticationService {
   Future<String> facebookSignIn({String email, String password}) async {
     try {
       final FacebookLogin facebookSignIn = new FacebookLogin();
-      final FacebookLoginResult result = await facebookSignIn.logIn(['email']);
+      final FacebookLoginResult result =
+          await facebookSignIn.logIn(['email', 'public_profile']);
       final facebookAuthCred =
           FacebookAuthProvider.credential(result.accessToken.token);
       await _firebaseAuth.signInWithCredential(facebookAuthCred);
@@ -26,16 +30,24 @@ class AuthenticationService {
           .doc(_firebaseAuth.currentUser.uid);
       var importFacebookEvents =
           FirebaseFunctions.instance.httpsCallable('importFacebookEvents');
+      final graphResponse = await http.get(Uri.parse(
+          "https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,email&access_token=${result.accessToken.token}"));
+
+      final profile = jsonDecode(graphResponse.body);
+      print(profile);
       importFacebookEvents({"facebookToken": result.accessToken.token})
           .whenComplete(() => print("gata"));
       userRef.get().then((user) {
         if (!user.exists) {
-          userRef.set({"authToken": result.accessToken.token});
+          userRef.set({
+            "authToken": result.accessToken.token,
+            "name": profile["name"],
+            "email": profile["email"]
+          });
         } else {
           userRef.update({"authToken": result.accessToken.token});
         }
       });
-      //.set({"authToken": result.accessToken.token});
 
       return "Signed in";
     } on FirebaseAuthException catch (e) {
