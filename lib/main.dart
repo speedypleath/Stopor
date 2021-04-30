@@ -21,8 +21,8 @@ Future<void> main() async {
   String host = Platform.isAndroid ? '10.0.2.2:8080' : 'localhost:8080';
   await Firebase.initializeApp();
   FirebaseFunctions functions = FirebaseFunctions.instance;
-  FirebaseFirestore.instance.settings =
-      Settings(host: host, sslEnabled: false, persistenceEnabled: false);
+  // FirebaseFirestore.instance.settings =
+  //   Settings(host: host, sslEnabled: false, persistenceEnabled: false);
   runApp(MyApp());
 }
 

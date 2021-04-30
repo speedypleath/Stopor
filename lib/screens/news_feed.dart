@@ -41,48 +41,53 @@ class _NewsFeed extends State<NewsFeed> {
 
   @override
   Widget build(BuildContext context) {
-    print("truuu");
     return FutureBuilder(
         future: context.read<DatabaseService>().getEventList(),
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-          FirebaseFirestore.instance.collection('users').get().then(
-              (value) => value.docs.forEach((element) => {print(element)}));
-          Widget child;
-          child = Scaffold(
-            body: ListView(
-              children: <Widget>[
-                Column(
-                  children: [for (var event in snapshot.data) EventCard(event)],
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    context.read<AuthenticationService>().signOut();
+          if (snapshot.connectionState != ConnectionState.done)
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          else {
+            Widget child;
+            child = Scaffold(
+              body: ListView(
+                children: <Widget>[
+                  Column(
+                    children: [
+                      for (var event in snapshot.data) EventCard(event)
+                    ],
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      context.read<AuthenticationService>().signOut();
+                    },
+                    child: Text("Sign out"),
+                  )
+                ],
+              ),
+              bottomNavigationBar: BottomNavigationBar(
+                  type: BottomNavigationBarType.fixed,
+                  currentIndex: _currentTab,
+                  onTap: (int value) {
+                    setState(() {
+                      _currentTab = value;
+                    });
                   },
-                  child: Text("Sign out"),
-                )
-              ],
-            ),
-            bottomNavigationBar: BottomNavigationBar(
-                type: BottomNavigationBarType.fixed,
-                currentIndex: _currentTab,
-                onTap: (int value) {
-                  setState(() {
-                    _currentTab = value;
-                  });
-                },
-                unselectedItemColor: Colors.grey,
-                selectedItemColor: Theme.of(context).primaryColor,
-                showSelectedLabels: false,
-                showUnselectedLabels: false,
-                items: icons
-                    .asMap()
-                    .entries
-                    .map(
-                      (MapEntry map) => _buildToolbarIcon(map.key),
-                    )
-                    .toList()),
-          );
-          return child;
+                  unselectedItemColor: Colors.grey,
+                  selectedItemColor: Theme.of(context).primaryColor,
+                  showSelectedLabels: false,
+                  showUnselectedLabels: false,
+                  items: icons
+                      .asMap()
+                      .entries
+                      .map(
+                        (MapEntry map) => _buildToolbarIcon(map.key),
+                      )
+                      .toList()),
+            );
+            return child;
+          }
         });
   }
 }
