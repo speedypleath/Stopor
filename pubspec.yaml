@@ -34,6 +34,9 @@ dependencies:
   flutter_facebook_login: ^3.0.0
   http: ^0.13.1
   pull_to_refresh: ^1.6.5
+  google_maps_flutter: ^2.0.1
+  image_picker: ^0.7.4
+
 
 dev_dependencies:
   flutter_test:
