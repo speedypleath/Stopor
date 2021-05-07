@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stopor/auth/login_screen.dart';
 import 'package:stopor/screens/add_event.dart';
+import 'package:stopor/screens/edit_event.dart';
 import 'package:stopor/screens/news_feed.dart';
 
 class AuthenticationWrapper extends StatelessWidget {

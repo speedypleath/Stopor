@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -5,6 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:stopor/auth/authentication_service.dart';
 import 'package:stopor/models/event.dart';
+import 'package:stopor/screens/add_event.dart';
+import 'package:stopor/util/set_overlay.dart';
 import 'package:stopor/widgets/event_card.dart';
 import 'package:provider/provider.dart';
 import '../data.dart';
@@ -19,9 +23,9 @@ class NewsFeed extends StatefulWidget {
 class _NewsFeed extends State<NewsFeed> {
   @override
   void initState() {
+    setOverlayWhite();
     super.initState();
     fetchUsers();
-    SystemChrome.setEnabledSystemUIOverlays([]);
   }
 
   List<dynamic> _events = [];
@@ -38,7 +42,7 @@ class _NewsFeed extends State<NewsFeed> {
                     shape: BoxShape.circle,
                     border: new Border.all(
                       color: (_currentTab == 3)
-                          ? Theme.of(context).primaryColor
+                          ? Theme.of(context).accentColor
                           : Theme.of(context).scaffoldBackgroundColor,
                       width: 2.0,
                     ),
@@ -56,7 +60,9 @@ class _NewsFeed extends State<NewsFeed> {
         Event event = new Event(
             date: DateTime(2020, 9, 17, 17, 30),
             name: element["name"],
-            eventImage: element["image"],
+            eventImage: element["image"] != false
+                ? element["image"]
+                : "https://keysight-h.assetsadobe.com/is/image/content/dam/keysight/en/img/prd/ixia-homepage-redirect/network-visibility-and-network-test-products/Network-Test-Solutions-New.jpg",
             location: element["location"],
             isOnline: element["isOnline"] == null ? false : true);
         eventObjects.add(event);
@@ -107,12 +113,16 @@ class _NewsFeed extends State<NewsFeed> {
           type: BottomNavigationBarType.fixed,
           currentIndex: _currentTab,
           onTap: (int value) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => AddEvent()),
+            ).then((value) => setOverlayWhite());
             setState(() {
               _currentTab = value;
             });
           },
           unselectedItemColor: Colors.grey,
-          selectedItemColor: Theme.of(context).primaryColor,
+          selectedItemColor: Theme.of(context).accentColor,
           showSelectedLabels: false,
           showUnselectedLabels: false,
           items: icons
