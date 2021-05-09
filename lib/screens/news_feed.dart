@@ -100,6 +100,19 @@ class _NewsFeed extends State<NewsFeed> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        elevation: 1,
+        leading: IconButton(
+          icon: Icon(
+            Icons.settings,
+            color: Colors.green,
+          ),
+          onPressed: () {
+            Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => SettingsScreen()));
+          },
+        ),
+      ),
       body: Container(
         child: _buildList(),
       ),
