@@ -10,9 +10,7 @@ class FadedBackground extends StatelessWidget {
     //return child;
     return Stack(children: [
       Positioned.fill(
-        child: Material(
-          child: child,
-        ),
+        child: child,
       ),
       new Positioned.fill(
           child: Material(

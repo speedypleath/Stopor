@@ -35,9 +35,6 @@ class MyApp extends StatelessWidget {
         Provider<AuthenticationService>(
           create: (context) => AuthenticationService(FirebaseAuth.instance),
         ),
-        Provider<DatabaseService>(
-          create: (context) => DatabaseService(FirebaseFirestore.instance),
-        ),
         StreamProvider(
           create: (context) =>
               context.read<AuthenticationService>().authStateChanges,
@@ -48,8 +45,10 @@ class MyApp extends StatelessWidget {
         title: 'Stopor',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
+            primaryColor: Color(0xFF5BFF81),
+            accentColor: Color(0xFF3AAA54),
             primarySwatch: Colors.green,
-            highlightColor: Colors.green.withOpacity(0.2),
+            highlightColor: Colors.green.withOpacity(0.35),
             scaffoldBackgroundColor: Color(0xFFF3F5F7),
             splashColor: Colors.transparent),
         home: AuthenticationWrapper(),

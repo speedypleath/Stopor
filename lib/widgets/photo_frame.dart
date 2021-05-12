@@ -46,27 +46,25 @@ class _PhotoFrame extends State<PhotoFrame> {
     showModalBottomSheet(
         context: context,
         builder: (BuildContext bc) {
-          return SafeArea(
-            child: Container(
-              child: new Wrap(
-                children: <Widget>[
-                  new ListTile(
-                      leading: new Icon(Icons.photo_library),
-                      title: new Text('Photo Library'),
-                      onTap: () {
-                        _imgFromGallery();
-                        Navigator.of(context).pop();
-                      }),
-                  new ListTile(
-                    leading: new Icon(Icons.photo_camera),
-                    title: new Text('Camera'),
+          return Container(
+            child: new Wrap(
+              children: <Widget>[
+                new ListTile(
+                    leading: new Icon(Icons.photo_library),
+                    title: new Text('Photo Library'),
                     onTap: () {
-                      _imgFromCamera();
+                      _imgFromGallery();
                       Navigator.of(context).pop();
-                    },
-                  ),
-                ],
-              ),
+                    }),
+                new ListTile(
+                  leading: new Icon(Icons.photo_camera),
+                  title: new Text('Camera'),
+                  onTap: () {
+                    _imgFromCamera();
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
             ),
           );
         });
@@ -82,11 +80,9 @@ class _PhotoFrame extends State<PhotoFrame> {
         height: MediaQuery.of(context).size.height * 0.3,
         child: FadedBackground(
           onTap: _showPicker,
-          child: Expanded(
-            child: _image == null
-                ? Image.asset("assets/images/thunderdome.jpg", fit: BoxFit.fill)
-                : Image.file(File(_image.path), fit: BoxFit.fill),
-          ),
+          child: _image == null
+              ? Image.asset("assets/images/thunderdome.jpg", fit: BoxFit.fill)
+              : Image.file(File(_image.path), fit: BoxFit.fill),
         ),
       ),
     );
