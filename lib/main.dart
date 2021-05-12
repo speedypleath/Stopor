@@ -35,9 +35,6 @@ class MyApp extends StatelessWidget {
         Provider<AuthenticationService>(
           create: (context) => AuthenticationService(FirebaseAuth.instance),
         ),
-        Provider<DatabaseService>(
-          create: (context) => DatabaseService(FirebaseFirestore.instance),
-        ),
         StreamProvider(
           create: (context) =>
               context.read<AuthenticationService>().authStateChanges,

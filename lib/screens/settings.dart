@@ -1,76 +1,181 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:settings_ui/settings_ui.dart';
 
-import 'languages_screen.dart';
-
-class SettingsScreen extends StatefulWidget {
+class SettingsPage extends StatefulWidget {
   @override
-  _SettingsScreenState createState() => _SettingsScreenState();
+  _SettingsPageState createState() => _SettingsPageState();
 }
 
-class _SettingsScreenState extends State<SettingsScreen> {
-  bool lockInBackground = true;
-
+class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Settings UI')),
-      body: SettingsList(
-        sections: [
-          SettingsSection(
-            title: 'Common',
-            tiles: [
-              SettingsTile(
-                title: 'Language',
-                subtitle: 'English',
-                leading: Icon(Icons.language),
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => LanguagesScreen()));
-                },
-              ),
-              SettingsTile(title: 'Environment', subtitle: 'Production', leading: Icon(Icons.cloud_queue)),
-            ],
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        elevation: 1,
+        leading: IconButton(
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+          icon: Icon(
+            Icons.arrow_back,
+            color: Colors.green,
           ),
-          SettingsSection(
-            title: 'Account',
-            tiles: [
-              SettingsTile(title: 'Phone number', leading: Icon(Icons.phone)),
-              SettingsTile(title: 'Email', leading: Icon(Icons.email)),
-              SettingsTile(title: 'Sign out', leading: Icon(Icons.exit_to_app)),
-            ],
-          ),
-          SettingsSection(
-            title: 'Secutiry',
-            tiles: [
-              SettingsTile.switchTile(
-                title: 'Lock app in background',
-                leading: Icon(Icons.phonelink_lock),
-                switchValue: lockInBackground,
-                onToggle: (bool value) {
-                  setState(() {
-                    lockInBackground = value;
-                  });
-                },
+        ),
+      ),
+      body: Container(
+        padding: EdgeInsets.only(left: 16, top: 25, right: 16),
+        child: ListView(
+          children: [
+            Text(
+              "Settings",
+              style: TextStyle(fontSize: 25, fontWeight: FontWeight.w500),
+            ),
+            SizedBox(
+              height: 40,
+            ),
+            Row(
+              children: [
+                Icon(
+                  Icons.person,
+                  color: Colors.green,
+                ),
+                SizedBox(
+                  width: 8,
+                ),
+                Text(
+                  "Account",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            Divider(
+              height: 15,
+              thickness: 2,
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            buildAccountOptionRow(context, "Change password"),
+            buildAccountOptionRow(context, "Content settings"),
+            buildAccountOptionRow(context, "Social"),
+            buildAccountOptionRow(context, "Language"),
+            buildAccountOptionRow(context, "Privacy and security"),
+            SizedBox(
+              height: 40,
+            ),
+            Row(
+              children: [
+                Icon(
+                  Icons.volume_up_outlined,
+                  color: Colors.green,
+                ),
+                SizedBox(
+                  width: 8,
+                ),
+                Text(
+                  "Notifications",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            Divider(
+              height: 15,
+              thickness: 2,
+            ),
+            SizedBox(
+              height: 10,
+            ),
+            buildNotificationOptionRow("New for you", true),
+            buildNotificationOptionRow("Account activity", true),
+            buildNotificationOptionRow("Opportunity", false),
+            SizedBox(
+              height: 50,
+            ),
+            Center(
+              child: OutlineButton(
+                padding: EdgeInsets.symmetric(horizontal: 40),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20)),
+                onPressed: () {},
+                child: Text("SIGN OUT",
+                    style: TextStyle(
+                        fontSize: 16, letterSpacing: 2.2, color: Colors.black)),
               ),
-              SettingsTile.switchTile(title: 'Use fingerprint', leading: Icon(Icons.fingerprint), onToggle: (bool value) {}, switchValue: false),
-              SettingsTile.switchTile(
-                title: 'Change password',
-                leading: Icon(Icons.lock),
-                switchValue: true,
-                onToggle: (bool value) {},
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Row buildNotificationOptionRow(String title, bool isActive) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey[600]),
+        ),
+        Transform.scale(
+            scale: 0.7,
+            child: CupertinoSwitch(
+              value: isActive,
+              onChanged: (bool val) {},
+            ))
+      ],
+    );
+  }
+
+  GestureDetector buildAccountOptionRow(BuildContext context, String title) {
+    return GestureDetector(
+      onTap: () {
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text(title),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text("Option 1"),
+                    Text("Option 2"),
+                    Text("Option 3"),
+                  ],
+                ),
+                actions: [
+                  FlatButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: Text("Close")),
+                ],
+              );
+            });
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+                color: Colors.grey[600],
               ),
-            ],
-          ),
-          SettingsSection(
-            title: 'Misc',
-            tiles: [
-              SettingsTile(title: 'Terms of Service', leading: Icon(Icons.description)),
-              SettingsTile(title: 'Open source licenses', leading: Icon(Icons.collections_bookmark)),
-            ],
-          )
-        ],
+            ),
+            Icon(
+              Icons.arrow_forward_ios,
+              color: Colors.grey,
+            ),
+          ],
+        ),
       ),
     );
   }
 }
-

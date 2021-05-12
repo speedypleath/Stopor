@@ -6,8 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:stopor/auth/authentication_service.dart';
+import 'package:stopor/database/database_service.dart';
 import 'package:stopor/models/event.dart';
 import 'package:stopor/screens/add_event.dart';
+import 'package:stopor/screens/settings.dart';
 import 'package:stopor/util/set_overlay.dart';
 import 'package:stopor/widgets/event_card.dart';
 import 'package:provider/provider.dart';
@@ -25,7 +27,7 @@ class _NewsFeed extends State<NewsFeed> {
   void initState() {
     setOverlayWhite();
     super.initState();
-    fetchUsers();
+    fetchEvents();
   }
 
   List<dynamic> _events = [];
@@ -51,27 +53,9 @@ class _NewsFeed extends State<NewsFeed> {
         label: '');
   }
 
-  void fetchUsers() async {
-    try {
-      var events = await FirebaseFirestore.instance.collection('events').get();
-      var data = events.docs.map((e) => e.data());
-      List<Event> eventObjects = [];
-      data.forEach((element) {
-        Event event = new Event(
-            date: DateTime(2020, 9, 17, 17, 30),
-            name: element["name"],
-            eventImage: element["image"] != false
-                ? element["image"]
-                : "https://keysight-h.assetsadobe.com/is/image/content/dam/keysight/en/img/prd/ixia-homepage-redirect/network-visibility-and-network-test-products/Network-Test-Solutions-New.jpg",
-            location: element["location"],
-            isOnline: element["isOnline"] == null ? false : true);
-        eventObjects.add(event);
-      });
-      _events = eventObjects;
-    } catch (e) {
-      print(e.toString());
-      return null;
-    }
+  void fetchEvents() async {
+    DatabaseService databaseService = DatabaseService();
+    _events = await databaseService.getEventList();
   }
 
   Widget _buildList() {
@@ -98,7 +82,7 @@ class _NewsFeed extends State<NewsFeed> {
 
   Future<void> _getData() async {
     setState(() {
-      fetchUsers();
+      fetchEvents();
     });
     _refreshController.refreshCompleted();
   }
@@ -113,10 +97,14 @@ class _NewsFeed extends State<NewsFeed> {
           type: BottomNavigationBarType.fixed,
           currentIndex: _currentTab,
           onTap: (int value) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => AddEvent()),
-            ).then((value) => setOverlayWhite());
+            if (value == 3)
+              Navigator.of(context).push(MaterialPageRoute(
+                  builder: (BuildContext context) => SettingsPage()));
+            else
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AddEvent()),
+              ).then((value) => setOverlayWhite());
             setState(() {
               _currentTab = value;
             });

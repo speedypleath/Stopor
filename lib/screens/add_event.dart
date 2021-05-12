@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:stopor/util/set_overlay.dart';
 import 'package:stopor/widgets/fade_background.dart';
 import 'package:stopor/widgets/form_row.dart';
-import 'package:stopor/widgets/photo_frame.dart';
 
 import 'edit_event.dart';
 
