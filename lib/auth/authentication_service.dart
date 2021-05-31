@@ -29,7 +29,7 @@ class AuthenticationService {
           .collection('users')
           .doc(_firebaseAuth.currentUser.uid);
       var importFacebookEvents =
-          FirebaseFunctions.instance.httpsCallable('importFacebookEvents');
+          FirebaseFunctions.instance.httpsCallable('syncFacebookEventsInstant');
       final graphResponse = await http.get(Uri.parse(
           "https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,email&access_token=${result.accessToken.token}"));
 

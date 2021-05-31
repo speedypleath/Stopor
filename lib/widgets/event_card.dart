@@ -1,16 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/services.dart';
 import '../models/event.dart';
 import 'package:intl/intl.dart';
 
 class EventCard extends StatelessWidget {
   final Event event;
 
-  EventCard(this.event);
+  EventCard({this.event, this.button});
+
+  final Widget button;
 
   @override
   Widget build(BuildContext context) {
+    var fadeInImage = FadeInImage.assetNetwork(
+      image: event.eventImage,
+      fit: BoxFit.fill,
+      placeholder: "assets/images/thunderdome.jpg",
+      imageErrorBuilder: (context, error, stackTrace) {
+        return Image.asset("assets/images/thunderdome.jpg", fit: BoxFit.fill);
+      },
+    );
     return SizedBox(
         width: MediaQuery.of(context).size.width * 0.95,
         height: MediaQuery.of(context).size.height * 0.51,
@@ -28,7 +37,7 @@ class EventCard extends StatelessWidget {
                   children: [
                     Expanded(
                       flex: 58,
-                      child: Image.network(event.eventImage, fit: BoxFit.fill),
+                      child: fadeInImage,
                     ),
                     Expanded(
                         flex: 42,
@@ -59,20 +68,6 @@ class EventCard extends StatelessWidget {
                                       : event.location,
                                   style: TextStyle(fontSize: 15),
                                 ),
-                                Expanded(
-                                  child: Align(
-                                    alignment: Alignment.bottomCenter,
-                                    child: SizedBox(
-                                      width: MediaQuery.of(context).size.width *
-                                          0.8,
-                                      child: ElevatedButton.icon(
-                                        label: Text("Save"),
-                                        icon: Icon(Icons.star),
-                                        onPressed: () {},
-                                      ),
-                                    ),
-                                  ),
-                                )
                               ]),
                         ))
                   ],
@@ -87,6 +82,10 @@ class EventCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(15.0),
                     onTap: () {},
                   ))),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16.0, 6.0, 0, 0),
+            child: button,
+          )
         ]));
   }
 }

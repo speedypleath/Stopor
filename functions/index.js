@@ -10,14 +10,15 @@ function syncFacebookEvents(authToken) {
     const data = res["data"];
     for (const key in data) {
       if ({}.hasOwnProperty.call(data, key)) {
-        console.log(data[key]["id"]);
         const fetch = new Promise((resolve, reject) => {
           FB.get(data[key]["id"]+"?fields=cover,is_online",
               (err2, res2) => {
-                resolve((res2["cover"]["source"], res2["is_online"]));
+                console.log(res2["is_online"]);
+                resolve({cover: res2["cover"]["source"],
+                  isOnline: res2["is_online"]});
               });
         });
-        fetch.then((cover, isOnline) => {
+        fetch.then((fields) => {
           admin.firestore().collection("events")
               .where("facebookId", "==", data[key]["id"])
               .get().then((val) => {
@@ -26,9 +27,17 @@ function syncFacebookEvents(authToken) {
                     "facebookId": data[key]["id"],
                     "name": data[key]["name"],
                     "description": data[key]["description"],
-                    "image": cover,
+                    "image": fields["cover"],
+                    "isOnline": fields["isOnline"],
                     "location": data[key]["place"]["name"],
-                    "isOnline": isOnline,
+                  });
+                } else {
+                  val.docs[0].ref.update({
+                    "name": data[key]["name"],
+                    "description": data[key]["description"],
+                    "image": fields["cover"],
+                    "isOnline": fields["isOnline"],
+                    "location": data[key]["place"]["name"],
                   });
                 }
               }
@@ -36,15 +45,11 @@ function syncFacebookEvents(authToken) {
         });
       }
     }
+    return null;
   });
 }
 
 admin.firestore().settings({ignoreUndefinedProperties: true});
-
-
-exports.syncFacebookEventsInstant = functions.https.onCall( (data, context) => {
-  syncFacebookEvents(data.authToken);
-});
 
 exports.syncFacebookEventsPeridodic = functions.pubsub.schedule("0 14 * * *")
     .timeZone("Europe/Bucharest")
@@ -57,38 +62,5 @@ exports.syncFacebookEventsPeridodic = functions.pubsub.schedule("0 14 * * *")
     });
 
 exports.importFacebookEvents = functions.https.onCall( (data, context) => {
-  FB.setAccessToken(data.authToken);
-  FB.get("me/events", function(err, res) {
-    const data = res["data"];
-    for (const key in data) {
-      if ({}.hasOwnProperty.call(data, key)) {
-        console.log(data[key]["id"]);
-        const fetch = new Promise((resolve, reject) => {
-          FB.get(data[key]["id"]+"?fields=cover",
-              (err2, res2) => {
-                resolve((res2["cover"]["source"], res2["is_online"]));
-              });
-        });
-        fetch.then((cover, isOnline) => {
-          admin.firestore().collection("events")
-              .where("facebookId", "==", data[key]["id"])
-              .get().then((val) => {
-                if (val.empty) {
-                  admin.firestore().collection("events").add({
-                    "facebookId": data[key]["id"],
-                    "name": data[key]["name"],
-                    "description": data[key]["description"],
-                    "image": cover,
-                    "isOnline": isOnline,
-                    "location": data[key]["place"]["name"],
-                  });
-                  console.log(isOnline);
-                }
-              }
-              ).catch((err) => console.log(err));
-        });
-      }
-    }
-    return null;
-  });
+  syncFacebookEvents(data.authToken);
 });

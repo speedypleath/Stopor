@@ -26,22 +26,35 @@ class DatabaseService {
     firestore.collection('events').add(event.toJSON());
   }
 
-  Future getEventList() async {
+  Future getEventList(pageKey, pageSize) async {
     try {
-      var events = await firestore.collection('events').get();
-      var data = events.docs.map((e) => e.data());
+      var events;
+      print(pageKey);
+      if (pageKey != "") {
+        var docRef = firestore.collection('events').doc(pageKey);
+        var snapshot = await docRef.get();
+        events = await firestore
+            .collection('events')
+            .startAfterDocument(snapshot)
+            .limit(pageSize)
+            .get();
+      } else {
+        events = await firestore.collection('events').limit(pageSize).get();
+      }
+      var data = events.docs;
       List<Event> eventObjects = [];
       data.forEach((element) {
         Event event = new Event(
-            description: element["description"],
+            id: element.id,
+            description: element.data()["description"],
             date: DateTime(2020, 9, 17, 17, 30),
-            name: element["name"],
-            eventImage: element["image"] != false
-                ? element["image"]
+            name: element.data()["name"],
+            eventImage: element.data()["image"] != false
+                ? element.data()["image"]
                 : "https://keysight-h.assetsadobe.com/is/image/content/dam/keysight/en/img/prd/ixia-homepage-redirect/network-visibility-and-network-test-products/Network-Test-Solutions-New.jpg",
-            location: element["location"],
-            isOnline: element["isOnline"] == null ? false : true,
-            facebookId: element["facebookId"]);
+            location: element.data()["location"],
+            isOnline: element.data()["isOnline"] == null ? false : true,
+            facebookId: element.data()["facebookId"]);
         eventObjects.add(event);
       });
       return eventObjects;

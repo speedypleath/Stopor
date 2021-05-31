@@ -7,8 +7,10 @@ class Event {
   String location;
   String inviteLink;
   String facebookId;
+  String id;
   Event(
-      {this.eventImage,
+      {this.id,
+      this.eventImage,
       this.name,
       this.date,
       this.isOnline,

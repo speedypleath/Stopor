@@ -2,10 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:stopor/auth/login_screen.dart';
-import 'package:stopor/screens/add_event.dart';
-import 'package:stopor/screens/edit_event.dart';
 import 'package:stopor/screens/news_feed.dart';
-import 'package:stopor/screens/settings.dart';
 
 class AuthenticationWrapper extends StatelessWidget {
   const AuthenticationWrapper({

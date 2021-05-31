@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:stopor/auth/authentication_service.dart';
 import 'package:stopor/database/database_service.dart';
 import 'package:stopor/models/event.dart';
@@ -25,15 +25,19 @@ class NewsFeed extends StatefulWidget {
 class _NewsFeed extends State<NewsFeed> {
   @override
   void initState() {
+    _pagingController.addPageRequestListener((pageKey) {
+      _fetchPage(pageKey);
+    });
     setOverlayWhite();
     super.initState();
-    fetchEvents();
   }
 
+  static const _pageSize = 5;
+
+  final PagingController<String, Event> _pagingController =
+      PagingController(firstPageKey: "");
   List<dynamic> _events = [];
   int _currentTab = 0;
-  RefreshController _refreshController =
-      RefreshController(initialRefresh: false);
 
   BottomNavigationBarItem _buildToolbarIcon(int index) {
     return BottomNavigationBarItem(
@@ -53,45 +57,53 @@ class _NewsFeed extends State<NewsFeed> {
         label: '');
   }
 
-  void fetchEvents() async {
-    DatabaseService databaseService = DatabaseService();
-    _events = await databaseService.getEventList();
+  Future<void> _fetchPage(String pageKey) async {
+    try {
+      DatabaseService databaseService = DatabaseService();
+      final newItems = await databaseService.getEventList(pageKey, _pageSize);
+      final isLastPage = newItems.length < _pageSize;
+      if (isLastPage) {
+        _pagingController.appendLastPage(newItems);
+      } else {
+        final nextPageKey = newItems[newItems.length - 1].id;
+        _pagingController.appendPage(newItems, nextPageKey);
+      }
+    } catch (error) {
+      _pagingController.error = error;
+    }
   }
 
   Widget _buildList() {
-    return _events.length != 0
-        ? SmartRefresher(
-            child: ListView(
-              children: <Widget>[
-                Column(
-                  children: [for (var event in _events) EventCard(event)],
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    context.read<AuthenticationService>().signOut();
-                  },
-                  child: Text("Sign out"),
-                )
-              ],
-            ),
-            controller: _refreshController,
-            onRefresh: _getData,
-          )
-        : Center(child: CircularProgressIndicator());
-  }
-
-  Future<void> _getData() async {
-    setState(() {
-      fetchEvents();
-    });
-    _refreshController.refreshCompleted();
+    return RefreshIndicator(
+      child: PagedListView<String, Event>(
+        pagingController: _pagingController,
+        builderDelegate: PagedChildBuilderDelegate<Event>(
+          itemBuilder: (context, item, index) => EventCard(
+              event: item,
+              button: ElevatedButton.icon(
+                label: Text("Save"),
+                icon: Icon(Icons.star),
+                onPressed: () {
+                  setState(() {
+                    _events.remove(item);
+                  });
+                },
+              )),
+        ),
+      ),
+      onRefresh: () => Future.sync(
+        () => _pagingController.refresh(),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        child: _buildList(),
+      body: SafeArea(
+        child: Container(
+          child: _buildList(),
+        ),
       ),
       bottomNavigationBar: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
