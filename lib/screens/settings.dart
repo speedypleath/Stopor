@@ -1,5 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:spotify_sdk/spotify_sdk.dart';
+import 'package:stopor/api_keys.dart';
+import 'package:stopor/auth/authentication_service.dart';
+import 'package:provider/provider.dart';
+import 'package:stopor/database/database_service.dart';
 
 class SettingsPage extends StatefulWidget {
   @override
@@ -7,6 +12,20 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  Future<void> connectToSpotify(BuildContext context) async {
+    var authenticationToken = await SpotifySdk.getAuthenticationToken(
+        clientId: APIKeys.clientIdSpotify,
+        redirectUrl: APIKeys.redirectURI,
+        scope:
+            "app-remote-control,user-modify-playback-state,playlist-read-private,user-follow-read");
+    DatabaseService databaseService = DatabaseService();
+    databaseService.setUserSpotifyToken(
+        context.read<AuthenticationService>().getUser().uid,
+        authenticationToken);
+  }
+
+  void importArtists(BuildContext context) {}
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -97,7 +116,9 @@ class _SettingsPageState extends State<SettingsPage> {
                 padding: EdgeInsets.symmetric(horizontal: 40),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20)),
-                onPressed: () {},
+                onPressed: () {
+                  context.read<AuthenticationService>().signOut();
+                },
                 child: Text("SIGN OUT",
                     style: TextStyle(
                         fontSize: 16, letterSpacing: 2.2, color: Colors.black)),
@@ -133,28 +154,7 @@ class _SettingsPageState extends State<SettingsPage> {
   GestureDetector buildAccountOptionRow(BuildContext context, String title) {
     return GestureDetector(
       onTap: () {
-        showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text(title),
-                content: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text("Option 1"),
-                    Text("Option 2"),
-                    Text("Option 3"),
-                  ],
-                ),
-                actions: [
-                  FlatButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: Text("Close")),
-                ],
-              );
-            });
+        connectToSpotify(context);
       },
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0),

@@ -43,6 +43,7 @@ dependencies:
   place_picker: ^0.9.19-nullsafety
   firebase_analytics: ^5.0.6
   infinite_scroll_pagination: ^3.0.1+1
+  spotify_sdk: ^2.1.0
 
 
 dev_dependencies:

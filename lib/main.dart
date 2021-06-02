@@ -1,20 +1,12 @@
 import 'dart:io';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:stopor/auth/authentication_wrapper.dart';
-import 'package:stopor/auth/login_screen.dart';
-import 'package:stopor/database/database_service.dart';
-import 'package:stopor/widgets/event_card.dart';
-
 import 'auth/authentication_service.dart';
-import 'data.dart';
-import 'screens/news_feed.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:stopor/models/event.dart';
+import 'package:stopor/models/user.dart';
 
 class DatabaseService {
   DatabaseService._privateConstructor();
@@ -62,5 +63,12 @@ class DatabaseService {
       print(e.toString());
       return null;
     }
+  }
+
+  Future<void> setUserSpotifyToken(String uid, String spotifyAuthToken) async {
+    firestore
+        .collection('users')
+        .doc(uid)
+        .update({"spotifyAuthToken": spotifyAuthToken});
   }
 }
