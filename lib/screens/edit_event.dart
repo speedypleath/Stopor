@@ -97,10 +97,11 @@ class _EditEvent extends State<EditEvent> {
 
   @override
   Widget build(BuildContext context) {
+    String title = event == null ? "Add Event" : "Edit event";
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        title: Text("Add Event"),
+        title: Text(title),
       ),
       body: Form(
         key: _formKey,

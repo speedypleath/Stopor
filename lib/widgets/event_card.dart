@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:stopor/screens/edit_event.dart';
 import '../models/event.dart';
 import 'package:intl/intl.dart';
 
@@ -80,7 +81,12 @@ class EventCard extends StatelessWidget {
                   color: Colors.transparent,
                   child: InkWell(
                     borderRadius: BorderRadius.circular(15.0),
-                    onTap: () {},
+                    onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => EditEvent(
+                                  event: event,
+                                ))),
                   ))),
           Padding(
             padding: const EdgeInsets.fromLTRB(16.0, 6.0, 0, 0),

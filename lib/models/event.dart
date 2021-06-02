@@ -1,3 +1,5 @@
+import 'package:stopor/models/user.dart';
+
 class Event {
   String eventImage;
   String description;
@@ -8,6 +10,7 @@ class Event {
   String inviteLink;
   String facebookId;
   String id;
+  User organiser;
   Event(
       {this.id,
       this.eventImage,
@@ -17,7 +20,8 @@ class Event {
       this.location,
       this.description,
       this.inviteLink,
-      this.facebookId});
+      this.facebookId,
+      this.organiser});
   Map<String, Object> toJSON() {
     return {
       'name': name,

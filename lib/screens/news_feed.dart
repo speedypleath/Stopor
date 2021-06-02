@@ -36,7 +36,6 @@ class _NewsFeed extends State<NewsFeed> {
 
   final PagingController<String, Event> _pagingController =
       PagingController(firstPageKey: "");
-  List<dynamic> _events = [];
   int _currentTab = 0;
 
   BottomNavigationBarItem _buildToolbarIcon(int index) {
@@ -85,7 +84,7 @@ class _NewsFeed extends State<NewsFeed> {
                 icon: Icon(Icons.star),
                 onPressed: () {
                   setState(() {
-                    _events.remove(item);
+                    _pagingController.itemList.removeAt(index);
                   });
                 },
               )),

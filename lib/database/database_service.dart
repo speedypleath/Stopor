@@ -44,7 +44,13 @@ class DatabaseService {
       }
       var data = events.docs;
       List<Event> eventObjects = [];
-      data.forEach((element) {
+      await data.forEach((element) async {
+        bool isOnline;
+        if (element.data()["isOnline"] == null)
+          isOnline = false;
+        else
+          isOnline = element.data()["isOnline"];
+        User organiser = await getUser(element.data()["organiser"]);
         Event event = new Event(
             id: element.id,
             description: element.data()["description"],
@@ -54,8 +60,9 @@ class DatabaseService {
                 ? element.data()["image"]
                 : "https://keysight-h.assetsadobe.com/is/image/content/dam/keysight/en/img/prd/ixia-homepage-redirect/network-visibility-and-network-test-products/Network-Test-Solutions-New.jpg",
             location: element.data()["location"],
-            isOnline: element.data()["isOnline"] == null ? false : true,
-            facebookId: element.data()["facebookId"]);
+            isOnline: isOnline,
+            facebookId: element.data()["facebookId"],
+            organiser: organiser);
         eventObjects.add(event);
       });
       return eventObjects;
@@ -70,5 +77,15 @@ class DatabaseService {
         .collection('users')
         .doc(uid)
         .update({"spotifyAuthToken": spotifyAuthToken});
+  }
+
+  Future<User> getUser(String uid) {
+    if (uid == null) return null;
+    return firestore.collection('users').doc(uid).get().then((value) => User(
+        email: value.data()["email"],
+        id: uid,
+        name: value.data()["name"],
+        facebookAuthToken: value.data()["authToken"],
+        spotifyAuthToken: value.data()["spotifyAuthToken"]));
   }
 }
