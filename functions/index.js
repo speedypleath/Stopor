@@ -15,22 +15,29 @@ function fetchUntilCondition(url, method, header) {
         for (const x in artists) {
           if ({}.hasOwnProperty.call(artists, x)) {
             const artist = artists[x];
-            console.log(artist);
             admin.firestore().collection("artists")
                 .where("spotifyId", "==", artist["id"])
                 .get().then((val) => {
+                  const genresMap = {};
+                  console.log(genresMap);
+                  for (const genre in artist["genres"]) {
+                    if ({}.hasOwnProperty.call(artist["genres"], genre)) {
+                      genresMap[artist["genres"][genre]] = true;
+                    }
+                  }
+                  console.log(genresMap);
                   if (val.empty) {
                     admin.firestore().collection("artists").add({
                       "spotifyId": artist["id"],
                       "name": artist["name"],
-                      "genres": artist["genres"],
+                      "genres": genresMap,
                       "image": artist["images"][1]["url"],
                     });
                   } else {
                     val.docs[0].ref.update({
                       "spotifyId": artist["id"],
                       "name": artist["name"],
-                      "genres": artist["genres"],
+                      "genres": genresMap,
                       "image": artist["images"][1]["url"],
                     });
                   }
