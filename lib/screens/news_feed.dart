@@ -1,9 +1,5 @@
-import 'dart:io';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:stopor/auth/authentication_service.dart';
 import 'package:stopor/database/database_service.dart';
@@ -25,18 +21,27 @@ class NewsFeed extends StatefulWidget {
 class _NewsFeed extends State<NewsFeed> {
   @override
   void initState() {
-    _pagingController.addPageRequestListener((pageKey) {
+    _eventListListener = (pageKey) {
       _fetchPage(pageKey);
-    });
+    };
+    _followedEventListener = (pageKey) {
+      _fetchFollowedEvents();
+    };
+    _pagingController.addPageRequestListener(_eventListListener);
     setOverlayWhite();
     super.initState();
   }
 
+  final ScrollController _homeController = ScrollController();
+  var _eventListListener;
+  var _followedEventListener;
   static const _pageSize = 5;
-
+  String _user;
+  final DatabaseService _database = new DatabaseService();
   final PagingController<String, Event> _pagingController =
       PagingController(firstPageKey: "");
   int _currentTab = 0;
+  bool _showSaveButton = true;
 
   BottomNavigationBarItem _buildToolbarIcon(int index) {
     return BottomNavigationBarItem(
@@ -56,10 +61,19 @@ class _NewsFeed extends State<NewsFeed> {
         label: '');
   }
 
+  Future<void> _fetchFollowedEvents() async {
+    DatabaseService databaseService = DatabaseService();
+    final newItems = await databaseService.getFollowedEventList(_user);
+    final nextPageKey = newItems[newItems.length - 1].id;
+    _pagingController.appendPage(newItems, nextPageKey);
+    _pagingController.appendLastPage([]);
+  }
+
   Future<void> _fetchPage(String pageKey) async {
     try {
       DatabaseService databaseService = DatabaseService();
-      final newItems = await databaseService.getEventList(pageKey, _pageSize);
+      final newItems =
+          await databaseService.getEventList(pageKey, _pageSize, _user);
       final isLastPage = newItems.length < _pageSize;
       if (isLastPage) {
         _pagingController.appendLastPage(newItems);
@@ -75,29 +89,37 @@ class _NewsFeed extends State<NewsFeed> {
   Widget _buildList() {
     return RefreshIndicator(
       child: PagedListView<String, Event>(
+        scrollController: _homeController,
         pagingController: _pagingController,
         builderDelegate: PagedChildBuilderDelegate<Event>(
           itemBuilder: (context, item, index) => EventCard(
               event: item,
-              button: ElevatedButton.icon(
-                label: Text("Save"),
-                icon: Icon(Icons.star),
-                onPressed: () {
-                  setState(() {
-                    _pagingController.itemList.removeAt(index);
-                  });
-                },
-              )),
+              button: _showSaveButton
+                  ? ElevatedButton.icon(
+                      label: Text("Save"),
+                      icon: Icon(Icons.star),
+                      onPressed: () {
+                        _database.followEvent(
+                            _pagingController.itemList.elementAt(index), _user);
+                        setState(() {
+                          _pagingController.itemList.removeAt(index);
+                        });
+                      },
+                    )
+                  : null),
         ),
       ),
       onRefresh: () => Future.sync(
-        () => _pagingController.refresh(),
+        () => {
+          _pagingController.refresh(),
+        },
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    _user = context.read<AuthenticationService>().getUser().uid;
     return Scaffold(
       body: SafeArea(
         child: Container(
@@ -108,10 +130,31 @@ class _NewsFeed extends State<NewsFeed> {
           type: BottomNavigationBarType.fixed,
           currentIndex: _currentTab,
           onTap: (int value) {
+            _homeController.animateTo(
+              0.0,
+              curve: Curves.easeOut,
+              duration: const Duration(milliseconds: 300),
+            );
             if (value == 3)
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (BuildContext context) => SettingsPage()));
-            else
+            else if (value == 1) {
+              _showSaveButton = false;
+              _pagingController.itemList.clear();
+              _pagingController.removePageRequestListener(_eventListListener);
+              _pagingController
+                  .removePageRequestListener(_followedEventListener);
+              _pagingController.addPageRequestListener(_followedEventListener);
+              _pagingController.refresh();
+            } else if (value == 0) {
+              _showSaveButton = true;
+              _pagingController.itemList.clear();
+              _pagingController
+                  .removePageRequestListener(_followedEventListener);
+              _pagingController.removePageRequestListener(_eventListListener);
+              _pagingController.addPageRequestListener(_eventListListener);
+              _pagingController.refresh();
+            } else
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => AddEvent()),
