@@ -9,7 +9,7 @@ import 'package:stopor/screens/settings.dart';
 import 'package:stopor/util/set_overlay.dart';
 import 'package:stopor/widgets/event_card.dart';
 import 'package:provider/provider.dart';
-import '../data.dart';
+import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
 
 class NewsFeed extends StatefulWidget {
   @override
@@ -18,7 +18,7 @@ class NewsFeed extends StatefulWidget {
   }
 }
 
-class _NewsFeed extends State<NewsFeed> {
+class _NewsFeed extends State<NewsFeed> with TickerProviderStateMixin {
   @override
   void initState() {
     _eventListListener = (pageKey) {
@@ -29,37 +29,19 @@ class _NewsFeed extends State<NewsFeed> {
     };
     _pagingController.addPageRequestListener(_eventListListener);
     setOverlayWhite();
+    controller = new TabController(length: 3, vsync: this);
     super.initState();
   }
 
-  final ScrollController _homeController = ScrollController();
-  var _eventListListener;
-  var _followedEventListener;
+  var controller;
+  bool _showSaveButton = true;
   static const _pageSize = 5;
   String _user;
-  final DatabaseService _database = new DatabaseService();
+  var _eventListListener;
+  var _followedEventListener;
   final PagingController<String, Event> _pagingController =
       PagingController(firstPageKey: "");
-  int _currentTab = 0;
-  bool _showSaveButton = true;
-
-  BottomNavigationBarItem _buildToolbarIcon(int index) {
-    return BottomNavigationBarItem(
-        icon: Container(
-            child: icons[index],
-            decoration: (index == 3)
-                ? new BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: new Border.all(
-                      color: (_currentTab == 3)
-                          ? Theme.of(context).accentColor
-                          : Theme.of(context).scaffoldBackgroundColor,
-                      width: 2.0,
-                    ),
-                  )
-                : null),
-        label: '');
-  }
+  DatabaseService _database = new DatabaseService();
 
   Future<void> _fetchFollowedEvents() async {
     DatabaseService databaseService = DatabaseService();
@@ -86,67 +68,53 @@ class _NewsFeed extends State<NewsFeed> {
     }
   }
 
-  Widget _buildList() {
-    return RefreshIndicator(
-      child: PagedListView<String, Event>(
-        scrollController: _homeController,
-        pagingController: _pagingController,
-        builderDelegate: PagedChildBuilderDelegate<Event>(
-          itemBuilder: (context, item, index) => EventCard(
-              event: item,
-              button: _showSaveButton
-                  ? ElevatedButton.icon(
-                      label: Text("Save"),
-                      icon: Icon(Icons.star),
-                      onPressed: () {
-                        _database.followEvent(
-                            _pagingController.itemList.elementAt(index), _user);
-                        setState(() {
-                          _pagingController.itemList.removeAt(index);
-                        });
-                      },
-                    )
-                  : null),
-        ),
-      ),
-      onRefresh: () => Future.sync(
-        () => {
-          _pagingController.refresh(),
-        },
+  Widget _buildEventView(context) {
+    return PagedSliverList<String, Event>(
+      pagingController: _pagingController,
+      builderDelegate: PagedChildBuilderDelegate<Event>(
+        itemBuilder: (context, item, index) => EventCard(
+            event: item,
+            button: _showSaveButton
+                ? ElevatedButton.icon(
+                    label: Text("Save"),
+                    icon: Icon(Icons.star),
+                    onPressed: () {
+                      _database.followEvent(
+                          _pagingController.itemList.elementAt(index), _user);
+                      setState(() {
+                        _pagingController.itemList.removeAt(index);
+                      });
+                    },
+                  )
+                : null),
       ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    _user = context.read<AuthenticationService>().getUser().uid;
-    return Scaffold(
-      body: SafeArea(
-        child: Container(
-          child: _buildList(),
+  Widget _buildTabBar(context) {
+    return SliverAppBar(
+      floating: true,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      toolbarHeight: 50,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          bottom: Radius.circular(20),
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          currentIndex: _currentTab,
-          onTap: (int value) {
-            _homeController.animateTo(
-              0.0,
-              curve: Curves.easeOut,
-              duration: const Duration(milliseconds: 300),
-            );
-            if (value == 3)
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (BuildContext context) => SettingsPage()));
-            else if (value == 1) {
-              _showSaveButton = false;
-              _pagingController.itemList.clear();
-              _pagingController.removePageRequestListener(_eventListListener);
-              _pagingController
-                  .removePageRequestListener(_followedEventListener);
-              _pagingController.addPageRequestListener(_followedEventListener);
-              _pagingController.refresh();
-            } else if (value == 0) {
+      flexibleSpace: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+        child: TabBar(
+          controller: controller,
+          labelColor: Colors.white,
+          unselectedLabelColor: Colors.black,
+          tabs: [Text("Recomended"), Text("Following"), Text("Nearby")],
+          indicator: BubbleTabIndicator(
+            tabBarIndicatorSize: TabBarIndicatorSize.tab,
+            indicatorHeight: 40,
+            indicatorColor: Theme.of(context).accentColor,
+          ),
+          onTap: (index) {
+            if (index == 0) {
               _showSaveButton = true;
               _pagingController.itemList.clear();
               _pagingController
@@ -154,26 +122,36 @@ class _NewsFeed extends State<NewsFeed> {
               _pagingController.removePageRequestListener(_eventListListener);
               _pagingController.addPageRequestListener(_eventListListener);
               _pagingController.refresh();
-            } else
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => AddEvent()),
-              ).then((value) => setOverlayWhite());
-            setState(() {
-              _currentTab = value;
-            });
+            } else if (index == 1) {
+              _showSaveButton = false;
+              _pagingController.itemList.clear();
+              _pagingController.removePageRequestListener(_eventListListener);
+              _pagingController
+                  .removePageRequestListener(_followedEventListener);
+              _pagingController.addPageRequestListener(_followedEventListener);
+              _pagingController.refresh();
+            }
           },
-          unselectedItemColor: Colors.grey,
-          selectedItemColor: Theme.of(context).accentColor,
-          showSelectedLabels: false,
-          showUnselectedLabels: false,
-          items: icons
-              .asMap()
-              .entries
-              .map(
-                (MapEntry map) => _buildToolbarIcon(map.key),
-              )
-              .toList()),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _user = context.read<AuthenticationService>().getUser().uid;
+    return SafeArea(
+      child: RefreshIndicator(
+        child: CustomScrollView(
+          physics: ClampingScrollPhysics(),
+          slivers: [_buildTabBar(context), _buildEventView(context)],
+        ),
+        onRefresh: () => Future.sync(
+          () => {
+            _pagingController.refresh(),
+          },
+        ),
+      ),
     );
   }
 }
