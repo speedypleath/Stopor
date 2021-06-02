@@ -27,6 +27,7 @@ class EditEvent extends StatefulWidget {
 class _EditEvent extends State<EditEvent> {
   Event event;
   final String type;
+  final _formKey = GlobalKey<FormState>();
   _EditEvent(this.type, this.event);
 
   PickedFile _image;
@@ -101,145 +102,319 @@ class _EditEvent extends State<EditEvent> {
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         title: Text("Add Event"),
       ),
-      body: ListView(
-        children: [
-          GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onTap: () => _showPicker(context),
-              child: SizedBox(
-                width: MediaQuery.of(context).size.width * 1,
-                height: MediaQuery.of(context).size.height * 0.3,
-                child: FadedBackground(
-                  onTap: _showPicker,
-                  child: _image == null
-                      ? Image.asset("assets/images/thunderdome.jpg",
-                          fit: BoxFit.fill)
-                      : Image.file(File(_image.path), fit: BoxFit.fill),
-                ),
-              )),
-          InkWell(
-            onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => EditField(
-                        field: "Name",
-                        value: event.name == null ? "" : event.name))).then(
-                (value) => setState(() => {
-                      setOverlayWhite(),
-                      event.name = value != "" ? value : null
-                    })),
-            child: FormRow(
-              icon: Icons.edit,
-              title: "Event name",
-              text:
-                  event.name == null ? "Enter event name here..." : event.name,
-            ),
-          ),
-          InkWell(
-            onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => EditField(
-                        field: "Description",
-                        value: event.description == null
-                            ? ""
-                            : event.description))).then((value) => setState(
-                () => {
-                      setOverlayWhite(),
-                      event.description = value != "" ? value : null
-                    })),
-            child: FormRow(
-              icon: Icons.description,
-              title: "Description",
-              text: event.description == null
-                  ? "Enter description here..."
-                  : event.description,
-            ),
-          ),
-          InkWell(
-            onTap: () => {
-              showDatePicker(
-                      context: context,
-                      initialDate: DateTime.now(),
-                      firstDate: DateTime.now(),
-                      lastDate: DateTime(DateTime.now().year + 20))
-                  .then((value) => {
-                        event.date = value,
-                        showTimePicker(
-                                context: context, initialTime: TimeOfDay.now())
-                            .then((value) => setState(() => event.date =
-                                DateTime(event.date.year, event.date.month,
-                                    event.date.day, value.hour, value.minute)))
-                      })
-            },
-            child: FormRow(
-              icon: Icons.calendar_today,
-              title: "Date",
-              text: event.date == null
-                  ? "Select date..."
-                  : event.date
-                      .toString()
-                      .substring(0, event.date.toString().length - 7),
-            ),
-          ),
-          type == "in person"
-              ? InkWell(
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => PlacePicker(
-                        apiKey: APIKeys.mapsKey,
-                        onPlacePicked: (result) {
-                          setState(() {
-                            event.location = result.formattedAddress;
-                            Navigator.of(context).pop();
-                          });
-                        },
-                        initialPosition: LatLng(44.4268, 26.1025),
-                        useCurrentLocation: false,
+      body: Form(
+        key: _formKey,
+        child: ListView(
+          children: [
+            GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onTap: () => _showPicker(context),
+                child: SizedBox(
+                  width: MediaQuery.of(context).size.width * 1,
+                  height: MediaQuery.of(context).size.height * 0.3,
+                  child: FadedBackground(
+                    onTap: _showPicker,
+                    child: _image == null
+                        ? Image.asset("assets/images/thunderdome.jpg",
+                            fit: BoxFit.fill)
+                        : Image.file(File(_image.path), fit: BoxFit.fill),
+                  ),
+                )),
+            Container(
+              margin: EdgeInsets.fromLTRB(2, 5, 2, 0),
+              child: FormField(
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter some text';
+                  }
+                  return null;
+                },
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                builder: (FormFieldState<dynamic> field) {
+                  // ignore: invalid_use_of_protected_member
+                  refresh(value) => field.setValue(value);
+                  return InputDecorator(
+                    decoration: InputDecoration(
+                      errorStyle: TextStyle(letterSpacing: 0.8),
+                      contentPadding: EdgeInsets.all(0),
+                      errorText: field.errorText,
+                      border: OutlineInputBorder(),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.transparent),
                       ),
                     ),
+                    child: InkWell(
+                      onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => EditField(
+                                      field: "Name",
+                                      value: event.name == null
+                                          ? ""
+                                          : event.name)))
+                          .then((value) => setState(() => {
+                                setOverlayWhite(),
+                                event.name = value != "" ? value : null,
+                                refresh(value != "" ? value : null),
+                                field.validate()
+                              })),
+                      child: FormRow(
+                        icon: Icons.edit,
+                        title: "Event name",
+                        text: event.name == null
+                            ? "Enter event name here..."
+                            : event.name,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.fromLTRB(2, 5, 2, 0),
+              child: FormField(
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter some text';
+                  }
+                  return null;
+                },
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                builder: (FormFieldState<dynamic> field) {
+                  // ignore: invalid_use_of_protected_member
+                  refresh(value) => field.setValue(value);
+                  return InputDecorator(
+                    decoration: InputDecoration(
+                      errorStyle: TextStyle(letterSpacing: 0.8),
+                      contentPadding: EdgeInsets.all(0),
+                      errorText: field.errorText,
+                      border: OutlineInputBorder(),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                    ),
+                    child: InkWell(
+                      onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => EditField(
+                                      field: "Description",
+                                      value: event.description == null
+                                          ? ""
+                                          : event.description)))
+                          .then((value) => setState(() => {
+                                setOverlayWhite(),
+                                event.description = value != "" ? value : null,
+                                refresh(value != "" ? value : null),
+                                field.validate()
+                              })),
+                      child: FormRow(
+                        icon: Icons.description,
+                        title: "Description",
+                        text: event.description == null
+                            ? "Enter description here..."
+                            : event.description,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.fromLTRB(2, 5, 2, 0),
+              child: FormField(
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter some date';
+                  }
+                  return null;
+                },
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                builder: (FormFieldState<dynamic> field) {
+                  // ignore: invalid_use_of_protected_member
+                  refresh(value) => field.setValue(value);
+                  return InputDecorator(
+                    decoration: InputDecoration(
+                      errorStyle: TextStyle(letterSpacing: 0.8),
+                      contentPadding: EdgeInsets.all(0),
+                      errorText: field.errorText,
+                      border: OutlineInputBorder(),
+                      enabledBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.transparent),
+                      ),
+                    ),
+                    child: InkWell(
+                      onTap: () => {
+                        showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                firstDate: DateTime.now(),
+                                lastDate: DateTime(DateTime.now().year + 20))
+                            .then((value) => {
+                                  event.date = value,
+                                  showTimePicker(
+                                          context: context,
+                                          initialTime: TimeOfDay.now())
+                                      .then((value) => {
+                                            setState(() => event.date =
+                                                DateTime(
+                                                    event.date.year,
+                                                    event.date.month,
+                                                    event.date.day,
+                                                    value.hour,
+                                                    value.minute)),
+                                            refresh(value.toString()),
+                                            field.validate()
+                                          })
+                                })
+                      },
+                      child: FormRow(
+                        icon: Icons.calendar_today,
+                        title: "Date",
+                        text: event.date == null
+                            ? "Select date..."
+                            : event.date
+                                .toString()
+                                .substring(0, event.date.toString().length - 7),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            type == "in person"
+                ? Container(
+                    margin: EdgeInsets.fromLTRB(2, 5, 2, 0),
+                    child: FormField(
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please select a location';
+                        }
+                        return null;
+                      },
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      builder: (FormFieldState<dynamic> field) {
+                        // ignore: invalid_use_of_protected_member
+                        refresh(value) => field.setValue(value);
+                        return InputDecorator(
+                          decoration: InputDecoration(
+                            errorStyle: TextStyle(letterSpacing: 0.8),
+                            contentPadding: EdgeInsets.all(0),
+                            errorText: field.errorText,
+                            border: OutlineInputBorder(),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.transparent),
+                            ),
+                          ),
+                          child: InkWell(
+                            onTap: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PlacePicker(
+                                  apiKey: APIKeys.mapsKey,
+                                  onPlacePicked: (result) {
+                                    setState(() {
+                                      event.location = result.formattedAddress;
+                                      refresh(event.location != ""
+                                          ? event.location
+                                          : null);
+                                      field.validate();
+                                      Navigator.of(context).pop();
+                                    });
+                                  },
+                                  initialPosition: LatLng(44.4268, 26.1025),
+                                  useCurrentLocation: false,
+                                ),
+                              ),
+                            ),
+                            child: FormRow(
+                              icon: Icons.location_pin,
+                              title: "Location",
+                              text: event.location == null
+                                  ? "Select location..."
+                                  : event.location,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  )
+                : Container(
+                    margin: EdgeInsets.fromLTRB(2, 5, 2, 0),
+                    child: FormField(
+                      validator: (value) {
+                        if (value == null ||
+                            value.isEmpty ||
+                            !Uri.parse(value).isAbsolute) {
+                          return 'Please enter a valid url';
+                        }
+                        return null;
+                      },
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
+                      builder: (FormFieldState<dynamic> field) {
+                        // ignore: invalid_use_of_protected_member
+                        refresh(value) => field.setValue(value);
+                        return InputDecorator(
+                          decoration: InputDecoration(
+                            errorStyle: TextStyle(letterSpacing: 0.8),
+                            contentPadding: EdgeInsets.all(0),
+                            errorText: field.errorText,
+                            border: OutlineInputBorder(),
+                            enabledBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.transparent),
+                            ),
+                          ),
+                          child: InkWell(
+                            onTap: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => EditField(
+                                            field: "Invite link",
+                                            value: event.inviteLink == null
+                                                ? ""
+                                                : event.inviteLink)))
+                                .then((value) => setState(() => {
+                                      setOverlayWhite(),
+                                      event.inviteLink =
+                                          value != "" ? value : null,
+                                      refresh(value != "" ? value : null),
+                                      field.validate()
+                                    })),
+                            child: FormRow(
+                              icon: Icons.public,
+                              title: "Online",
+                              text: event.inviteLink == null
+                                  ? "Enter invite link here..."
+                                  : event.inviteLink,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                  child: FormRow(
-                    icon: Icons.location_pin,
-                    title: "Location",
-                    text: event.location == null
-                        ? "Select location..."
-                        : event.location,
-                  ),
-                )
-              : InkWell(
-                  onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => EditField(
-                              field: "Invite link",
-                              value: event.inviteLink == null
-                                  ? ""
-                                  : event.inviteLink))).then((value) =>
-                      setState(() => {
-                            setOverlayWhite(),
-                            event.inviteLink = value != "" ? value : null
-                          })),
-                  child: FormRow(
-                    icon: Icons.public,
-                    title: "Online",
-                    text: event.inviteLink == null
-                        ? "Enter invite link here..."
-                        : event.inviteLink,
-                  ),
-                ),
-          ElevatedButton(
-            onPressed: () {
-              DatabaseService databaseService = DatabaseService();
-              databaseService.uploadPic(_image.path).then((value) => {
-                    event.eventImage = value,
-                    databaseService.uploadEvent(event)
-                  });
-            },
-            child: Text("Submit"),
-          )
-        ],
+            ElevatedButton(
+              onPressed: () {
+                print("hmm");
+                if (_formKey.currentState.validate()) {
+                  DatabaseService databaseService = DatabaseService();
+                  if (_image != null)
+                    databaseService.uploadPic(_image.path).then((value) => {
+                          event.eventImage = value,
+                          databaseService.uploadEvent(event)
+                        });
+                  else {
+                    event.eventImage =
+                        "stopor-f035c.appspot.com/thunderdome.jpg";
+                    databaseService.uploadEvent(event);
+                  }
+                } else {
+                  print("nu");
+                }
+              },
+              child: Text("Submit"),
+            )
+          ],
+        ),
       ),
     );
   }

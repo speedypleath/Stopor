@@ -131,3 +131,23 @@ exports.importSpotifyArtistsInstant = functions.https.onCall(
     (data, context) => {
       importSpotifyArtists(data.authToken);
     });
+
+exports.syncFacebookEventsPeridodic = functions.pubsub.schedule("0 14 * * *")
+    .timeZone("Europe/Bucharest")
+    .onRun(() => {
+      admin.firestore().collection("users").get().then((query) => {
+        query.docs.forEach((user) => {
+          importFacebookEvents(user.data().authToken);
+        });
+      });
+    });
+
+exports.importFacebookEventsInstant = functions.https.onCall(
+    (data, context) => {
+      importFacebookEvents(data.authToken);
+    });
+
+exports.importSpotifyArtistsInstant = functions.https.onCall(
+    (data, context) => {
+      importSpotifyArtists(data.authToken);
+    });
