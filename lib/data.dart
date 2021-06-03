@@ -35,14 +35,12 @@ List<Widget> icons = [
     Icons.home,
   ),
   Icon(
-    Icons.search,
+    Icons.star,
   ),
   Icon(
     Icons.notifications,
   ),
   CircleAvatar(
     radius: 12.0,
-    backgroundImage: NetworkImage(
-        "https://scontent.fotp3-2.fna.fbcdn.net/v/t1.6435-9/145719669_1128044897627163_8034789827807243572_n.jpg?_nc_cat=100&ccb=1-3&_nc_sid=09cbfe&_nc_ohc=39oySmw5pNYAX9g7WSN&_nc_ht=scontent.fotp3-2.fna&oh=00caf9a84cb5621f962559ead06afbf8&oe=609EF30B"),
-  ),
+  )
 ];
