@@ -29,7 +29,6 @@ class _State extends State<BottomNav> {
     super.initState();
   }
 
-  final ScrollController _homeController = ScrollController();
   var _eventListListener;
   var _followedEventListener;
   static const _pageSize = 5;
@@ -92,35 +91,6 @@ class _State extends State<BottomNav> {
           type: BottomNavigationBarType.fixed,
           currentIndex: _currentTab,
           onTap: (int value) {
-            _homeController.animateTo(
-              0.0,
-              curve: Curves.easeOut,
-              duration: const Duration(milliseconds: 300),
-            );
-            if (value == 3)
-              Navigator.of(context).push(MaterialPageRoute(
-                  builder: (BuildContext context) => SettingsPage()));
-            else if (value == 1) {
-              _showSaveButton = false;
-              _pagingController.itemList.clear();
-              _pagingController.removePageRequestListener(_eventListListener);
-              _pagingController
-                  .removePageRequestListener(_followedEventListener);
-              _pagingController.addPageRequestListener(_followedEventListener);
-              _pagingController.refresh();
-            } else if (value == 0) {
-              _showSaveButton = true;
-              _pagingController.itemList.clear();
-              _pagingController
-                  .removePageRequestListener(_followedEventListener);
-              _pagingController.removePageRequestListener(_eventListListener);
-              _pagingController.addPageRequestListener(_eventListListener);
-              _pagingController.refresh();
-            } else
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => AddEvent()),
-              ).then((value) => setOverlayWhite());
             setState(() {
               _currentTab = value;
             });

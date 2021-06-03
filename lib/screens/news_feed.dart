@@ -4,12 +4,12 @@ import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:stopor/auth/authentication_service.dart';
 import 'package:stopor/database/database_service.dart';
 import 'package:stopor/models/event.dart';
-import 'package:stopor/screens/add_event.dart';
-import 'package:stopor/screens/settings.dart';
+import 'package:stopor/util/get_location.dart';
 import 'package:stopor/util/set_overlay.dart';
 import 'package:stopor/widgets/event_card.dart';
 import 'package:provider/provider.dart';
 import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
+import 'package:geolocator/geolocator.dart';
 
 class NewsFeed extends StatefulWidget {
   @override
@@ -27,21 +27,28 @@ class _NewsFeed extends State<NewsFeed> with TickerProviderStateMixin {
     _followedEventListener = (pageKey) {
       _fetchFollowedEvents();
     };
+    _nearbyEventListener = (pageKey) {
+      _fetchNearbyEvents(pageKey);
+    };
     _pagingController.addPageRequestListener(_eventListListener);
     setOverlayWhite();
     controller = new TabController(length: 3, vsync: this);
+    _currentLocation = getCurrentLocation();
     super.initState();
   }
 
+  final ScrollController _homeController = ScrollController();
   var controller;
   bool _showSaveButton = true;
   static const _pageSize = 5;
   String _user;
+  var _nearbyEventListener;
   var _eventListListener;
   var _followedEventListener;
   final PagingController<String, Event> _pagingController =
       PagingController(firstPageKey: "");
   DatabaseService _database = new DatabaseService();
+  Position _currentLocation;
 
   Future<void> _fetchFollowedEvents() async {
     DatabaseService databaseService = DatabaseService();
@@ -56,6 +63,27 @@ class _NewsFeed extends State<NewsFeed> with TickerProviderStateMixin {
       DatabaseService databaseService = DatabaseService();
       final newItems =
           await databaseService.getEventList(pageKey, _pageSize, _user);
+      final isLastPage = newItems.length < _pageSize;
+      if (isLastPage) {
+        _pagingController.appendLastPage(newItems);
+      } else {
+        final nextPageKey = newItems[newItems.length - 1].id;
+        _pagingController.appendPage(newItems, nextPageKey);
+      }
+    } catch (error) {
+      _pagingController.error = error;
+    }
+  }
+
+  Future<void> _fetchNearbyEvents(String pageKey) async {
+    try {
+      DatabaseService databaseService = DatabaseService();
+      final newItems = await databaseService.getNearbyEventList(
+          pageKey,
+          _pageSize,
+          _user,
+          _currentLocation.latitude,
+          _currentLocation.longitude);
       final isLastPage = newItems.length < _pageSize;
       if (isLastPage) {
         _pagingController.appendLastPage(newItems);
@@ -91,6 +119,13 @@ class _NewsFeed extends State<NewsFeed> with TickerProviderStateMixin {
     );
   }
 
+  _clearEventController() {
+    if (_pagingController.itemList != null) _pagingController.itemList.clear();
+    _pagingController.removePageRequestListener(_followedEventListener);
+    _pagingController.removePageRequestListener(_eventListListener);
+    _pagingController.removePageRequestListener(_nearbyEventListener);
+  }
+
   Widget _buildTabBar(context) {
     return SliverAppBar(
       floating: true,
@@ -101,37 +136,45 @@ class _NewsFeed extends State<NewsFeed> with TickerProviderStateMixin {
           bottom: Radius.circular(20),
         ),
       ),
-      flexibleSpace: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
-        child: TabBar(
-          controller: controller,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.black,
-          tabs: [Text("Recomended"), Text("Following"), Text("Nearby")],
-          indicator: BubbleTabIndicator(
-            tabBarIndicatorSize: TabBarIndicatorSize.tab,
-            indicatorHeight: 40,
-            indicatorColor: Theme.of(context).accentColor,
+      flexibleSpace: DefaultTabController(
+        length: 3,
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+          child: TabBar(
+            controller: controller,
+            labelColor: Colors.white,
+            unselectedLabelColor: Colors.black,
+            tabs: [Text("Recomended"), Text("Following"), Text("Nearby")],
+            indicator: BubbleTabIndicator(
+              tabBarIndicatorSize: TabBarIndicatorSize.tab,
+              indicatorHeight: 40,
+              indicatorColor: Theme.of(context).accentColor,
+            ),
+            onTap: (index) {
+              _homeController.animateTo(
+                0.0,
+                curve: Curves.easeOut,
+                duration: const Duration(milliseconds: 300),
+              );
+              if (index == 0) {
+                _showSaveButton = true;
+                _clearEventController();
+                _pagingController.addPageRequestListener(_eventListListener);
+                _pagingController.refresh();
+              } else if (index == 2) {
+                _showSaveButton = false;
+                _clearEventController();
+                _pagingController
+                    .addPageRequestListener(_followedEventListener);
+                _pagingController.refresh();
+              } else if (index == 1) {
+                // _showSaveButton = true;
+                // _clearEventController();
+                // _pagingController.addListener(_followedEventListener);
+                // _pagingController.refresh();
+              }
+            },
           ),
-          onTap: (index) {
-            if (index == 0) {
-              _showSaveButton = true;
-              _pagingController.itemList.clear();
-              _pagingController
-                  .removePageRequestListener(_followedEventListener);
-              _pagingController.removePageRequestListener(_eventListListener);
-              _pagingController.addPageRequestListener(_eventListListener);
-              _pagingController.refresh();
-            } else if (index == 1) {
-              _showSaveButton = false;
-              _pagingController.itemList.clear();
-              _pagingController.removePageRequestListener(_eventListListener);
-              _pagingController
-                  .removePageRequestListener(_followedEventListener);
-              _pagingController.addPageRequestListener(_followedEventListener);
-              _pagingController.refresh();
-            }
-          },
         ),
       ),
     );
@@ -143,6 +186,7 @@ class _NewsFeed extends State<NewsFeed> with TickerProviderStateMixin {
     return SafeArea(
       child: RefreshIndicator(
         child: CustomScrollView(
+          controller: _homeController,
           physics: ClampingScrollPhysics(),
           slivers: [_buildTabBar(context), _buildEventView(context)],
         ),

@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:stopor/models/event.dart';
 import 'package:stopor/models/user.dart';
+import 'package:geoflutterfire/geoflutterfire.dart';
 
 class DatabaseService {
   DatabaseService._privateConstructor();
@@ -12,6 +13,8 @@ class DatabaseService {
   factory DatabaseService() {
     return _instance;
   }
+
+  final geo = Geoflutterfire();
 
   FirebaseStorage storage = FirebaseStorage.instance;
 
@@ -28,6 +31,46 @@ class DatabaseService {
 
   Future<void> uploadEvent(event) async {
     firestore.collection('events').add(event.toJSON());
+  }
+
+  Future getNearbyEventList(pageKey, pageSize, uid, latitude, longitude) async {
+    try {
+      _uid = uid;
+      await getFollowedEventList(uid);
+      GeoFirePoint center = geo.point(latitude: latitude, longitude: longitude);
+      List<String> followedEvents =
+          _followedEvents.map((e) => e.id).cast<String>().toList();
+      print(followedEvents);
+      var query;
+      if (pageKey != "") {
+        var docRef = firestore.collection('events').doc(pageKey);
+        var snapshot = await docRef.get();
+        query = firestore
+            .collection('events')
+            .startAfterDocument(snapshot)
+            .limit(pageSize);
+      } else {
+        query = firestore.collection('events').limit(pageSize);
+      }
+      var geoRef = geo
+          .collection(collectionRef: query)
+          .within(center: center, radius: 10, field: 'location.position');
+
+      List<Event> events = [];
+      try {
+        await geoRef.forEach((List<DocumentSnapshot> documentList) {
+          documentList.forEach((DocumentSnapshot doc) async {
+            Event event = await mapToEvent(doc.data(), doc.id);
+            events.add(event);
+          });
+        }).timeout(Duration(seconds: 1));
+      } catch (e) {
+        return events;
+      }
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
   }
 
   Future<List<Event>> getFollowedEventList(uid) async {
@@ -65,11 +108,7 @@ class DatabaseService {
             .limit(pageSize)
             .get();
       } else {
-        events = await firestore
-            .collection('events')
-            .where(FieldPath.documentId, whereNotIn: followedEvents)
-            .limit(pageSize)
-            .get();
+        events = await firestore.collection('events').limit(pageSize).get();
       }
       List<Event> eventList = await mapToEventList(events.docs);
       return eventList;
@@ -90,6 +129,11 @@ class DatabaseService {
 
   Future<Event> mapToEvent(data, id) async {
     bool isOnline;
+    String location;
+    if (data["location"] == null)
+      location = "";
+    else
+      location = data["location"]["name"];
     if (data["isOnline"] == null)
       isOnline = false;
     else
@@ -103,7 +147,7 @@ class DatabaseService {
         eventImage: data["image"] != false
             ? data["image"]
             : "https://keysight-h.assetsadobe.com/is/image/content/dam/keysight/en/img/prd/ixia-homepage-redirect/network-visibility-and-network-test-products/Network-Test-Solutions-New.jpg",
-        location: data["location"],
+        location: location,
         isOnline: isOnline,
         facebookId: data["facebookId"],
         organiser: organiser);

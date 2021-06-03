@@ -4,6 +4,7 @@ const FB = require("fbgraph");
 const admin = require("firebase-admin");
 const fetch = require("node-fetch");
 admin.initializeApp();
+const geo = require("geofirex").init(admin);
 
 function fetchUntilCondition(url, method, header) {
   fetch(url, {
@@ -74,7 +75,6 @@ function importFacebookEvents(authToken) {
         const fetch = new Promise((resolve, reject) => {
           FB.get(data[key]["id"]+"?fields=cover,is_online",
               (err2, res2) => {
-                console.log(res2["is_online"]);
                 resolve({cover: res2["cover"]["source"],
                   isOnline: res2["is_online"]});
               });
@@ -83,6 +83,13 @@ function importFacebookEvents(authToken) {
           admin.firestore().collection("events")
               .where("facebookId", "==", data[key]["id"])
               .get().then((val) => {
+                let location = null;
+                if (data[key]["place"]["location"] != null) {
+                  const position = geo.point(
+                      parseFloat(data[key]["place"]["location"]["latitude"]),
+                      parseFloat(data[key]["place"]["location"]["longitude"]));
+                  location = {name: data[key]["place"]["name"], position};
+                }
                 if (val.empty) {
                   admin.firestore().collection("events").add({
                     "facebookId": data[key]["id"],
@@ -90,7 +97,7 @@ function importFacebookEvents(authToken) {
                     "description": data[key]["description"],
                     "image": fields["cover"],
                     "isOnline": fields["isOnline"],
-                    "location": data[key]["place"]["name"],
+                    "location": location,
                   });
                 } else {
                   val.docs[0].ref.update({
@@ -98,7 +105,7 @@ function importFacebookEvents(authToken) {
                     "description": data[key]["description"],
                     "image": fields["cover"],
                     "isOnline": fields["isOnline"],
-                    "location": data[key]["place"]["name"],
+                    "location": location,
                   });
                 }
               }
