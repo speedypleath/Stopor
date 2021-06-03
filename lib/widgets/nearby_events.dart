@@ -1,37 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:stopor/auth/authentication_service.dart';
 import 'package:stopor/database/database_service.dart';
 import 'package:stopor/models/event.dart';
 import 'package:provider/provider.dart';
+import 'package:stopor/util/get_location.dart';
 import 'event_card.dart';
 
-class EventList extends StatefulWidget {
-  EventList();
+class NearbyEvents extends StatefulWidget {
+  NearbyEvents();
   @override
-  _EventListState createState() => _EventListState();
+  _NearbyEventsState createState() => _NearbyEventsState();
 }
 
-class _EventListState extends State<EventList> {
+class _NearbyEventsState extends State<NearbyEvents> {
   @override
   void initState() {
     _pagingController.addPageRequestListener((pageKey) {
-      _fetchPage(pageKey);
+      _fetchNearbyEvents(pageKey);
     });
     super.initState();
   }
 
-  _EventListState();
   final PagingController<String, Event> _pagingController =
       PagingController(firstPageKey: "");
   final DatabaseService _database = new DatabaseService();
   String _user;
-  final int _pageSize = 5;
-  Future<void> _fetchPage(String pageKey) async {
+  final _pageSize = 5;
+  Position _currentLocation;
+
+  Future<void> _fetchNearbyEvents(String pageKey) async {
     try {
+      _currentLocation = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.best);
       DatabaseService databaseService = DatabaseService();
-      final newItems =
-          await databaseService.getEventList(pageKey, _pageSize, _user);
+      final newItems = await databaseService.getNearbyEventList(
+          pageKey,
+          _pageSize,
+          _user,
+          _currentLocation.latitude,
+          _currentLocation.longitude);
       final isLastPage = newItems.length < _pageSize;
       if (isLastPage) {
         _pagingController.appendLastPage(newItems);

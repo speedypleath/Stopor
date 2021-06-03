@@ -1,10 +1,7 @@
 import 'package:geolocator/geolocator.dart';
 
-getCurrentLocation() {
-  Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best)
-      .then((Position position) {
-    return position;
-  }).catchError((e) {
-    print(e);
-  });
+getCurrentLocation() async {
+  Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.best);
+  return position;
 }
