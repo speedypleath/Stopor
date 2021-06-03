@@ -28,14 +28,14 @@ class AuthenticationService {
       DocumentReference userRef = FirebaseFirestore.instance
           .collection('users')
           .doc(_firebaseAuth.currentUser.uid);
-      var importFacebookEvents =
-          FirebaseFunctions.instance.httpsCallable('syncFacebookEventsInstant');
+      var importFacebookEvents = FirebaseFunctions.instance
+          .httpsCallable('importFacebookEventsInstant');
       final graphResponse = await http.get(Uri.parse(
           "https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,email&access_token=${result.accessToken.token}"));
 
       final profile = jsonDecode(graphResponse.body);
       print(profile);
-      importFacebookEvents({"facebookToken": result.accessToken.token})
+      importFacebookEvents({"authToken": result.accessToken.token})
           .whenComplete(() => print("gata"));
       userRef.get().then((user) {
         if (!user.exists) {

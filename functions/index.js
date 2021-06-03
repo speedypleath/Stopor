@@ -1,10 +1,72 @@
+/* eslint-disable require-jsdoc */
 const functions = require("firebase-functions");
 const FB = require("fbgraph");
 const admin = require("firebase-admin");
+const fetch = require("node-fetch");
 admin.initializeApp();
+const geo = require("geofirex").init(admin);
 
-// eslint-disable-next-line require-jsdoc
-function syncFacebookEvents(authToken) {
+function fetchUntilCondition(url, method, header) {
+  fetch(url, {
+    method: method,
+    headers: header,
+  }).then((res) => res.json())
+      .then((response) => {
+        const artists = response["artists"]["items"];
+        for (const x in artists) {
+          if ({}.hasOwnProperty.call(artists, x)) {
+            const artist = artists[x];
+            admin.firestore().collection("artists")
+                .where("spotifyId", "==", artist["id"])
+                .get().then((val) => {
+                  const genresMap = {};
+                  console.log(genresMap);
+                  for (const genre in artist["genres"]) {
+                    if ({}.hasOwnProperty.call(artist["genres"], genre)) {
+                      genresMap[artist["genres"][genre]] = true;
+                    }
+                  }
+                  console.log(genresMap);
+                  if (val.empty) {
+                    admin.firestore().collection("artists").add({
+                      "spotifyId": artist["id"],
+                      "name": artist["name"],
+                      "genres": genresMap,
+                      "image": artist["images"][1]["url"],
+                    });
+                  } else {
+                    val.docs[0].ref.update({
+                      "spotifyId": artist["id"],
+                      "name": artist["name"],
+                      "genres": genresMap,
+                      "image": artist["images"][1]["url"],
+                    });
+                  }
+                }
+                ).catch((err) => console.log(err));
+          }
+        }
+        console.log(response["artists"]["next"]);
+        if (response["artists"]["next"] != null) {
+          console.log("da");
+          const newUrl = response["artists"]["next"];
+          console.log(newUrl);
+          fetchUntilCondition(newUrl, method, header);
+        }
+      });
+}
+
+function importSpotifyArtists(authToken) {
+  const url = "https://api.spotify.com/v1/me/following?type=artist&limit=50";
+  const method = "GET";
+  const header = {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${authToken}`,
+  };
+  fetchUntilCondition(url, method, header);
+}
+
+function importFacebookEvents(authToken) {
   FB.setAccessToken(authToken);
   FB.get("me/events", function(err, res) {
     const data = res["data"];
@@ -13,7 +75,6 @@ function syncFacebookEvents(authToken) {
         const fetch = new Promise((resolve, reject) => {
           FB.get(data[key]["id"]+"?fields=cover,is_online",
               (err2, res2) => {
-                console.log(res2["is_online"]);
                 resolve({cover: res2["cover"]["source"],
                   isOnline: res2["is_online"]});
               });
@@ -22,6 +83,13 @@ function syncFacebookEvents(authToken) {
           admin.firestore().collection("events")
               .where("facebookId", "==", data[key]["id"])
               .get().then((val) => {
+                let location = null;
+                if (data[key]["place"]["location"] != null) {
+                  const position = geo.point(
+                      parseFloat(data[key]["place"]["location"]["latitude"]),
+                      parseFloat(data[key]["place"]["location"]["longitude"]));
+                  location = {name: data[key]["place"]["name"], position};
+                }
                 if (val.empty) {
                   admin.firestore().collection("events").add({
                     "facebookId": data[key]["id"],
@@ -29,7 +97,7 @@ function syncFacebookEvents(authToken) {
                     "description": data[key]["description"],
                     "image": fields["cover"],
                     "isOnline": fields["isOnline"],
-                    "location": data[key]["place"]["name"],
+                    "location": location,
                   });
                 } else {
                   val.docs[0].ref.update({
@@ -37,7 +105,7 @@ function syncFacebookEvents(authToken) {
                     "description": data[key]["description"],
                     "image": fields["cover"],
                     "isOnline": fields["isOnline"],
-                    "location": data[key]["place"]["name"],
+                    "location": location,
                   });
                 }
               }
@@ -56,11 +124,37 @@ exports.syncFacebookEventsPeridodic = functions.pubsub.schedule("0 14 * * *")
     .onRun(() => {
       admin.firestore().collection("users").get().then((query) => {
         query.docs.forEach((user) => {
-          syncFacebookEvents(user.data().authToken);
+          importFacebookEvents(user.data().authToken);
         });
       });
     });
 
-exports.importFacebookEvents = functions.https.onCall( (data, context) => {
-  syncFacebookEvents(data.authToken);
-});
+exports.importFacebookEventsInstant = functions.https.onCall(
+    (data, context) => {
+      importFacebookEvents(data.authToken);
+    });
+
+exports.importSpotifyArtistsInstant = functions.https.onCall(
+    (data, context) => {
+      importSpotifyArtists(data.authToken);
+    });
+
+exports.syncFacebookEventsPeridodic = functions.pubsub.schedule("0 14 * * *")
+    .timeZone("Europe/Bucharest")
+    .onRun(() => {
+      admin.firestore().collection("users").get().then((query) => {
+        query.docs.forEach((user) => {
+          importFacebookEvents(user.data().authToken);
+        });
+      });
+    });
+
+exports.importFacebookEventsInstant = functions.https.onCall(
+    (data, context) => {
+      importFacebookEvents(data.authToken);
+    });
+
+exports.importSpotifyArtistsInstant = functions.https.onCall(
+    (data, context) => {
+      importSpotifyArtists(data.authToken);
+    });

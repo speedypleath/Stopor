@@ -7,7 +7,7 @@ packages:
       name: async
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.5.0"
+    version: "2.6.1"
   boolean_selector:
     dependency: transitive
     description:
@@ -15,6 +15,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.1.0"
+  bubble_tab_indicator:
+    dependency: "direct main"
+    description:
+      name: bubble_tab_indicator
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.1.6"
   characters:
     dependency: transitive
     description:
@@ -85,6 +92,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.15.0"
+  crypto:
+    dependency: transitive
+    description:
+      name: crypto
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.1"
   cupertino_icons:
     dependency: "direct main"
     description:
@@ -92,6 +106,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.2"
+  dio:
+    dependency: transitive
+    description:
+      name: dio
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.0.0"
   fake_async:
     dependency: transitive
     description:
@@ -205,6 +226,13 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  geoflutterfire:
+    dependency: "direct main"
+    description:
+      name: geoflutterfire
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.0-nullsafety.2"
   geolocator:
     dependency: "direct main"
     description:
@@ -345,6 +373,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.0"
+  logger:
+    dependency: transitive
+    description:
+      name: logger
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.0"
   matcher:
     dependency: transitive
     description:
@@ -436,6 +471,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "3.0.1"
+  rxdart:
+    dependency: transitive
+    description:
+      name: rxdart
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.26.0"
   settings_ui:
     dependency: "direct main"
     description:
@@ -461,7 +503,14 @@ packages:
       name: source_span
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.8.0"
+    version: "1.8.1"
+  spotify_sdk:
+    dependency: "direct main"
+    description:
+      name: spotify_sdk
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.1.0"
   stack_trace:
     dependency: transitive
     description:
@@ -490,6 +539,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.1.0"
+  synchronized:
+    dependency: transitive
+    description:
+      name: synchronized
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.0"
   term_glyph:
     dependency: transitive
     description:
@@ -503,7 +559,7 @@ packages:
       name: test_api
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.2.19"
+    version: "0.3.0"
   tuple:
     dependency: transitive
     description:
