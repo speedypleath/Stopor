@@ -4,11 +4,12 @@ import 'package:provider/provider.dart';
 import 'package:stopor/auth/login.dart';
 import 'package:stopor/screens/bottom_nav.dart';
 
-class AuthenticationWrapper extends StatelessWidget {
-  const AuthenticationWrapper({
-    Key key,
-  }) : super(key: key);
+class AuthenticationWrapper extends StatefulWidget {
+  @override
+  _AuthenticationWrapperState createState() => _AuthenticationWrapperState();
+}
 
+class _AuthenticationWrapperState extends State<AuthenticationWrapper> {
   @override
   Widget build(BuildContext context) {
     final firebaseUser = context.watch<User>();

@@ -63,11 +63,16 @@ class AuthenticationService {
     }
   }
 
+  Future<void> passwordReset({String email}) async {
+    await _firebaseAuth.sendPasswordResetEmail(email: email);
+  }
+
   Future<void> signOut() async {
     await _firebaseAuth.signOut();
   }
 
-  Future<String> signUp({String email, String password}) async {
+  Future<String> signUp(
+      {String email, String password, String username}) async {
     try {
       await _firebaseAuth
           .createUserWithEmailAndPassword(email: email, password: password)
@@ -75,7 +80,7 @@ class AuthenticationService {
                 FirebaseFirestore.instance
                     .collection('users')
                     .doc(newUser.user.uid)
-                    .set({}),
+                    .set({email: email, username: username}),
                 newUser.user.sendEmailVerification()
               });
       return "Signed up";
