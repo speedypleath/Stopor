@@ -5,6 +5,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 
 class AuthenticationService {
   final FirebaseAuth _firebaseAuth;
@@ -15,7 +16,36 @@ class AuthenticationService {
 
   User getUser() => _firebaseAuth.currentUser;
 
-  Future<String> facebookSignIn({String email, String password}) async {
+  Future<String> changePassword(String password) async {
+    String message = "Password changed";
+    await _firebaseAuth.currentUser
+        .updatePassword(password)
+        .catchError((error) {
+      message = error.message;
+    });
+    return message;
+  }
+
+  Future<void> changeImage(String image) async {
+    _firebaseAuth.currentUser.updateProfile(photoURL: image);
+  }
+
+  Future<void> changeUsername(String username) async {
+    await _firebaseAuth.currentUser
+        .updateProfile(displayName: username)
+        .catchError((error) {
+      print(error.toString());
+    });
+  }
+
+  Future<void> deleteAccount() async {
+    _firebaseAuth.currentUser.delete().catchError((error) {
+      print(error.toString());
+    });
+    signOut();
+  }
+
+  Future<String> facebookSignIn() async {
     try {
       final FacebookLogin facebookSignIn = new FacebookLogin();
       final FacebookLoginResult result =
@@ -35,14 +65,15 @@ class AuthenticationService {
       print(profile);
       importFacebookEvents({"authToken": result.accessToken.token})
           .whenComplete(() => print("gata"));
+      _firebaseAuth.currentUser.updateProfile(displayName: profile["name"]);
       userRef.get().then((user) {
-        if (!user.exists) {
+        if (!user.exists)
           userRef.set({
             "authToken": result.accessToken.token,
-            "name": profile["name"],
+            "username": profile["name"],
             "email": profile["email"]
           });
-        } else {
+        else {
           userRef.update({"authToken": result.accessToken.token});
         }
       });
@@ -77,6 +108,7 @@ class AuthenticationService {
       await _firebaseAuth
           .createUserWithEmailAndPassword(email: email, password: password)
           .then((newUser) => {
+                newUser.user.updateProfile(displayName: username),
                 FirebaseFirestore.instance
                     .collection('users')
                     .doc(newUser.user.uid)

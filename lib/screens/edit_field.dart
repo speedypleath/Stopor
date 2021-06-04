@@ -5,7 +5,9 @@ import 'package:stopor/util/set_overlay.dart';
 class EditField extends StatelessWidget {
   final String field;
   final String value;
-  EditField({Key key, this.field, this.value}) : super(key: key);
+  final bool hiddenText;
+  EditField({Key key, this.field, this.value, this.hiddenText = false})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -19,15 +21,25 @@ class EditField extends StatelessWidget {
           leading: BackButton(
             onPressed: () => Navigator.pop(context, controller.text),
           ),
+          actions: [
+            new TextButton(
+              child: Text(
+                "Cancel",
+                style: TextStyle(color: Colors.black),
+              ),
+              onPressed: () => Navigator.pop(context),
+            ),
+          ],
         ),
         body: Container(
           height: MediaQuery.of(context).size.height,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-            child: TextField(
+            child: TextFormField(
+              obscureText: hiddenText,
               controller: controller,
               keyboardType: TextInputType.multiline,
-              maxLines: 500,
+              maxLines: hiddenText ? 1 : 500,
             ),
           ),
         ));

@@ -24,9 +24,8 @@ class _LoginScreenState extends State<LoginScreen> {
     });
   }
 
-  void _facebookLogin(BuildContext context) {
-    context.read<AuthenticationService>().facebookSignIn();
-    setState(() {});
+  void _facebookLogin(BuildContext context) async {
+    await context.read<AuthenticationService>().facebookSignIn();
   }
 
   void _passwordReset(BuildContext context) {
