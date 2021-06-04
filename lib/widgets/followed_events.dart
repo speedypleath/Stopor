@@ -23,7 +23,6 @@ class _FollowedEventsState extends State<FollowedEvents> {
 
   final PagingController<String, Event> _pagingController =
       PagingController(firstPageKey: "");
-  final DatabaseService _database = new DatabaseService();
   String _user;
   Future<void> _fetchFollowedEvents() async {
     DatabaseService databaseService = DatabaseService();
