@@ -217,7 +217,12 @@ class _SettingsPageState extends State<SettingsPage> {
 
   @override
   Widget build(BuildContext context) {
-    String image = context.read<AuthenticationService>().getUser().photoURL;
+    String photoURL = context.read<AuthenticationService>().getUser().photoURL;
+    Image image = photoURL != null
+        ? Image.network(photoURL,
+            width: 150.0, height: 150.0, fit: BoxFit.contain)
+        : Image.asset("assets/images/default_pfp.jpg",
+            width: 150.0, height: 150.0, fit: BoxFit.contain);
     return Scaffold(
       body: Container(
         padding: EdgeInsets.only(left: 16, top: 25, right: 16),
@@ -233,12 +238,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   height: 150,
                   width: 150,
                   color: Colors.grey.shade200,
-                  child: Image.network(
-                    image,
-                    width: 150.0,
-                    height: 150.0,
-                    fit: BoxFit.contain,
-                  ),
+                  child: image,
                 ),
               )),
             ),

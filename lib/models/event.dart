@@ -31,7 +31,8 @@ class Event {
       'image': eventImage,
       'inviteLink': inviteLink,
       'location': location,
-      'facebookId': facebookId
+      'facebookId': facebookId,
+      'followersCount': 0,
     };
   }
 }

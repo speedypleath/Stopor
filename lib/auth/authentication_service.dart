@@ -70,7 +70,6 @@ class AuthenticationService {
         if (!user.exists)
           userRef.set({
             "authToken": result.accessToken.token,
-            "username": profile["name"],
             "email": profile["email"]
           });
         else {
@@ -112,7 +111,7 @@ class AuthenticationService {
                 FirebaseFirestore.instance
                     .collection('users')
                     .doc(newUser.user.uid)
-                    .set({email: email, username: username}),
+                    .set({"email": email}),
                 newUser.user.sendEmailVerification()
               });
       return "Signed up";

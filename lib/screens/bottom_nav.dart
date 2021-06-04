@@ -14,21 +14,24 @@ class BottomNav extends StatefulWidget {
 class _State extends State<BottomNav> {
   @override
   void initState() {
+    String photoURL = context.read<AuthenticationService>().getUser().photoURL;
+    var image = photoURL != null
+        ? NetworkImage(photoURL)
+        : AssetImage("assets/images/default_pfp.jpg");
     setOverlayWhite();
     icons = [
       Icon(
         Icons.home,
       ),
       Icon(
-        Icons.star,
+        Icons.search,
       ),
       Icon(
         Icons.notifications,
       ),
       CircleAvatar(
         radius: 12.0,
-        backgroundImage: NetworkImage(
-            context.read<AuthenticationService>().getUser().photoURL),
+        backgroundImage: image,
       )
     ];
     super.initState();
