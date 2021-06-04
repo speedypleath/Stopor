@@ -1,10 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:stopor/auth/authentication_service.dart';
 import 'package:stopor/screens/news_feed.dart';
 import 'package:stopor/screens/settings.dart';
 import 'package:stopor/util/set_overlay.dart';
-
-import '../data.dart';
+import 'package:provider/provider.dart';
 
 class BottomNav extends StatefulWidget {
   @override
@@ -15,8 +15,26 @@ class _State extends State<BottomNav> {
   @override
   void initState() {
     setOverlayWhite();
+    icons = [
+      Icon(
+        Icons.home,
+      ),
+      Icon(
+        Icons.star,
+      ),
+      Icon(
+        Icons.notifications,
+      ),
+      CircleAvatar(
+        radius: 12.0,
+        backgroundImage: NetworkImage(
+            context.read<AuthenticationService>().getUser().photoURL),
+      )
+    ];
     super.initState();
   }
+
+  List<Widget> icons;
 
   int _currentTab = 0;
   final List _screens = [NewsFeed(), Scaffold(), Scaffold(), SettingsPage()];

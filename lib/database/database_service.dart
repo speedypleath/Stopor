@@ -101,14 +101,17 @@ class DatabaseService {
       if (pageKey != "") {
         var docRef = firestore.collection('events').doc(pageKey);
         var snapshot = await docRef.get();
-        events = await firestore
-            .collection('events')
-            .where(FieldPath.documentId, whereNotIn: followedEvents)
-            .startAfterDocument(snapshot)
-            .limit(pageSize)
-            .get();
+        events = firestore.collection('events');
+
+        if (followedEvents.isNotEmpty)
+          events =
+              events.where(FieldPath.documentId, whereNotIn: followedEvents);
+
+        events =
+            await events.startAfterDocument(snapshot).limit(pageSize).get();
       } else {
         events = await firestore.collection('events').limit(pageSize).get();
+        print(events);
       }
       List<Event> eventList = await mapToEventList(events.docs);
       return eventList;
