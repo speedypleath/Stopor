@@ -96,7 +96,6 @@ class DatabaseService {
       await getFollowedEventList(uid);
       List<String> followedEvents =
           _followedEvents.map((e) => e.id).cast<String>().toList();
-      print(followedEvents);
       var events;
       if (pageKey != "") {
         var docRef = firestore.collection('events').doc(pageKey);
@@ -104,14 +103,30 @@ class DatabaseService {
         events = firestore.collection('events');
 
         if (followedEvents.isNotEmpty)
-          events =
-              events.where(FieldPath.documentId, whereNotIn: followedEvents);
+          events = events
+              .where("documentId", whereNotIn: followedEvents)
+              .orderBy("documentId");
 
-        events =
-            await events.startAfterDocument(snapshot).limit(pageSize).get();
+        events = await events
+            .orderBy("followersCount")
+            .startAfterDocument(snapshot)
+            .limit(pageSize)
+            .get();
       } else {
-        events = await firestore.collection('events').limit(pageSize).get();
-        print(events);
+        if (followedEvents.isNotEmpty)
+          events = await firestore
+              .collection('events')
+              .where("documentId", whereNotIn: followedEvents)
+              .orderBy("documentId")
+              .orderBy("followersCount")
+              .limit(pageSize)
+              .get();
+        else
+          events = await firestore
+              .collection('events')
+              .orderBy("followersCount")
+              .limit(pageSize)
+              .get();
       }
       List<Event> eventList = await mapToEventList(events.docs);
       return eventList;
@@ -180,9 +195,9 @@ class DatabaseService {
         .doc(uid)
         .collection('events')
         .add(event.toJSON());
-    firestore
-        .collection('events')
-        .doc(event.id)
-        .update({"followers.$uid": true});
+    firestore.collection('events').doc(event.id).update({
+      "followers.$uid": true,
+      "followersCount": FieldValue.increment(1),
+    });
   }
 }

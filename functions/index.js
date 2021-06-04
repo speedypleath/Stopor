@@ -98,6 +98,7 @@ function importFacebookEvents(authToken) {
                     "image": fields["cover"],
                     "isOnline": fields["isOnline"],
                     "location": location,
+                    "followersCount": 0,
                   });
                 } else {
                   val.docs[0].ref.update({
@@ -106,6 +107,7 @@ function importFacebookEvents(authToken) {
                     "image": fields["cover"],
                     "isOnline": fields["isOnline"],
                     "location": location,
+                    "followersCount": 0,
                   });
                 }
               }
@@ -157,4 +159,10 @@ exports.importFacebookEventsInstant = functions.https.onCall(
 exports.importSpotifyArtistsInstant = functions.https.onCall(
     (data, context) => {
       importSpotifyArtists(data.authToken);
+    });
+
+exports.setDocumentId = functions.firestore
+    .document("events/{docId}")
+    .onCreate((snap, context) => {
+      snap.ref.update({"documentId": context.params.docId});
     });

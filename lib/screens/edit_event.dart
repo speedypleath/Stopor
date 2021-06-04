@@ -2,13 +2,15 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_place_picker/google_maps_place_picker.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:stopor/auth/authentication_service.dart';
 import 'package:stopor/database/database_service.dart';
 import 'package:stopor/models/event.dart';
 import 'package:stopor/util/set_overlay.dart';
 import 'package:stopor/widgets/fade_background.dart';
 import 'package:stopor/widgets/form_row.dart';
-
+import 'package:provider/provider.dart';
 import '../api_keys.dart';
 import 'edit_field.dart';
 
@@ -29,8 +31,9 @@ class _EditEvent extends State<EditEvent> {
   final String type;
   final _formKey = GlobalKey<FormState>();
   _EditEvent(this.type, this.event);
-
+  DatabaseService _databaseService = DatabaseService();
   PickedFile _image;
+  File _croppedImage;
   ImagePicker _picker = new ImagePicker();
 
   getImage() {
@@ -58,6 +61,23 @@ class _EditEvent extends State<EditEvent> {
     setState(() {
       _image = image;
     });
+    _cropImage(image);
+  }
+
+  _cropImage(image) async {
+    if (image == null) return;
+    _croppedImage = await ImageCropper.cropImage(
+        sourcePath: image.path,
+        aspectRatioPresets: [CropAspectRatioPreset.ratio16x9],
+        androidUiSettings: AndroidUiSettings(
+            toolbarTitle: 'Cropper',
+            toolbarColor: Colors.green,
+            toolbarWidgetColor: Colors.white,
+            initAspectRatio: CropAspectRatioPreset.ratio16x9,
+            lockAspectRatio: false),
+        iosUiSettings: IOSUiSettings(
+          title: 'Cropper',
+        ));
   }
 
   void _showPicker(context) {
@@ -395,18 +415,15 @@ class _EditEvent extends State<EditEvent> {
                   ),
             ElevatedButton(
               onPressed: () {
-                print("hmm");
                 if (_formKey.currentState.validate()) {
-                  DatabaseService databaseService = DatabaseService();
-                  if (_image != null)
-                    databaseService.uploadPic(_image.path).then((value) => {
-                          event.eventImage = value,
-                          databaseService.uploadEvent(event)
-                        });
+                  if (_croppedImage != null)
+                    _databaseService.uploadPic(_croppedImage.path).then(
+                        (value) => {
+                              event.eventImage = value,
+                              _databaseService.uploadEvent(event)
+                            });
                   else {
-                    event.eventImage =
-                        "stopor-f035c.appspot.com/thunderdome.jpg";
-                    databaseService.uploadEvent(event);
+                    _databaseService.uploadEvent(event);
                   }
                 } else {
                   print("nu");

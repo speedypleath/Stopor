@@ -27,8 +27,10 @@ class _FollowedEventsState extends State<FollowedEvents> {
   Future<void> _fetchFollowedEvents() async {
     DatabaseService databaseService = DatabaseService();
     final newItems = await databaseService.getFollowedEventList(_user);
-    final nextPageKey = newItems[newItems.length - 1].id;
-    _pagingController.appendPage(newItems, nextPageKey);
+    if (newItems.isNotEmpty) {
+      final nextPageKey = newItems[newItems.length - 1].id;
+      _pagingController.appendPage(newItems, nextPageKey);
+    }
     _pagingController.appendLastPage([]);
   }
 
