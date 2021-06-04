@@ -1,6 +1,3 @@
-import 'dart:io';
-
-import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -10,9 +7,9 @@ import 'auth/authentication_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  String host = Platform.isAndroid ? '10.0.2.2:8080' : 'localhost:8080';
+  //String host = Platform.isAndroid ? '10.0.2.2:8080' : 'localhost:8080';
   await Firebase.initializeApp();
-  FirebaseFunctions functions = FirebaseFunctions.instance;
+  //FirebaseFunctions functions = FirebaseFunctions.instance;
   // FirebaseFirestore.instance.settings =
   //   Settings(host: host, sslEnabled: false, persistenceEnabled: false);
   runApp(MyApp());

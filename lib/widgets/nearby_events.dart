@@ -5,7 +5,6 @@ import 'package:stopor/auth/authentication_service.dart';
 import 'package:stopor/database/database_service.dart';
 import 'package:stopor/models/event.dart';
 import 'package:provider/provider.dart';
-import 'package:stopor/util/get_location.dart';
 import 'event_card.dart';
 
 class NearbyEvents extends StatefulWidget {
