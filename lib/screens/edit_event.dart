@@ -4,13 +4,11 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_place_picker/google_maps_place_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:stopor/auth/authentication_service.dart';
 import 'package:stopor/database/database_service.dart';
 import 'package:stopor/models/event.dart';
 import 'package:stopor/util/set_overlay.dart';
 import 'package:stopor/widgets/fade_background.dart';
 import 'package:stopor/widgets/form_row.dart';
-import 'package:provider/provider.dart';
 import '../api_keys.dart';
 import 'edit_field.dart';
 
@@ -425,8 +423,7 @@ class _EditEvent extends State<EditEvent> {
                   else {
                     _databaseService.uploadEvent(event);
                   }
-                } else {
-                  print("nu");
+                  Navigator.popUntil(context, (route) => route.isFirst);
                 }
               },
               child: Text("Submit"),

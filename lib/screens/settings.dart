@@ -250,7 +250,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   fontSize: 23,
                   letterSpacing: 0.4,
                   fontWeight: FontWeight.w500,
-                  color: Colors.green),
+                  color: Colors.green[600]),
             ),
             SizedBox(height: MediaQuery.of(context).size.height * 0.05),
             Text(

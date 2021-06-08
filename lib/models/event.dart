@@ -10,7 +10,7 @@ class Event {
   String inviteLink;
   String facebookId;
   String id;
-  User organiser;
+  String organiser;
   Event(
       {this.id,
       this.eventImage,

@@ -47,6 +47,12 @@ dependencies:
   bubble_tab_indicator: ^0.1.6
   geoflutterfire: ^3.0.0-nullsafety.2
   image_cropper: ^1.4.0
+  auto_size_text: ^2.1.0
+  mockito: ^5.0.9
+  firebase_auth_mocks: ^0.7.0
+  test: ^1.16.8
+  dcdg: ^3.1.0
+  flutter_search_bar: ^2.1.0
 
 
 dev_dependencies:

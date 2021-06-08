@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:stopor/screens/edit_event.dart';
+import 'package:stopor/screens/view_event.dart';
 import '../models/event.dart';
 import 'package:intl/intl.dart';
 
@@ -84,7 +84,7 @@ class EventCard extends StatelessWidget {
                     onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => EditEvent(
+                            builder: (context) => ViewEvent(
                                   event: event,
                                 ))),
                   ))),

@@ -5,7 +5,6 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:http/http.dart' as http;
-import 'package:image_picker/image_picker.dart';
 
 class AuthenticationService {
   final FirebaseAuth _firebaseAuth;
@@ -28,6 +27,10 @@ class AuthenticationService {
 
   Future<void> changeImage(String image) async {
     _firebaseAuth.currentUser.updateProfile(photoURL: image);
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(_firebaseAuth.currentUser.uid)
+        .update({"profilePic": image});
   }
 
   Future<void> changeUsername(String username) async {
@@ -36,12 +39,20 @@ class AuthenticationService {
         .catchError((error) {
       print(error.toString());
     });
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(_firebaseAuth.currentUser.uid)
+        .update({"name": username});
   }
 
   Future<void> deleteAccount() async {
     _firebaseAuth.currentUser.delete().catchError((error) {
       print(error.toString());
     });
+    FirebaseFirestore.instance
+        .collection('users')
+        .doc(_firebaseAuth.currentUser.uid)
+        .delete();
     signOut();
   }
 
@@ -65,14 +76,15 @@ class AuthenticationService {
       print(profile);
       importFacebookEvents({"authToken": result.accessToken.token})
           .whenComplete(() => print("gata"));
-      _firebaseAuth.currentUser.updateProfile(displayName: profile["name"]);
       userRef.get().then((user) {
-        if (!user.exists)
+        if (!user.exists) {
+          _firebaseAuth.currentUser.updateProfile(displayName: profile["name"]);
           userRef.set({
             "authToken": result.accessToken.token,
-            "email": profile["email"]
+            "email": profile["email"],
+            "name": profile["name"],
           });
-        else {
+        } else {
           userRef.update({"authToken": result.accessToken.token});
         }
       });
@@ -111,7 +123,7 @@ class AuthenticationService {
                 FirebaseFirestore.instance
                     .collection('users')
                     .doc(newUser.user.uid)
-                    .set({"email": email}),
+                    .set({"email": email, "name": username}),
                 newUser.user.sendEmailVerification()
               });
       return "Signed up";

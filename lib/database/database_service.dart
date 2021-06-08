@@ -96,6 +96,7 @@ class DatabaseService {
       await getFollowedEventList(uid);
       List<String> followedEvents =
           _followedEvents.map((e) => e.id).cast<String>().toList();
+      print(followedEvents);
       var events;
       if (pageKey != "") {
         var docRef = firestore.collection('events').doc(pageKey);
@@ -113,6 +114,8 @@ class DatabaseService {
             .limit(pageSize)
             .get();
       } else {
+        events = await firestore.collection('events').limit(pageSize).get();
+        print(events);
         if (followedEvents.isNotEmpty)
           events = await firestore
               .collection('events')
@@ -146,6 +149,7 @@ class DatabaseService {
   }
 
   Future<Event> mapToEvent(data, id) async {
+    String organiser = data["organiser"];
     bool isOnline;
     String location;
     if (data["location"] == null)
@@ -156,8 +160,9 @@ class DatabaseService {
       isOnline = false;
     else
       isOnline = data["isOnline"];
-    User organiser = await getUser(data["organiser"]);
-    return new Event(
+    String facebookId = data["facebookId"] == null ? "" : data["facebookId"];
+    try {
+      return new Event(
         id: id,
         description: data["description"],
         date: DateTime(2020, 9, 17, 17, 30),
@@ -167,8 +172,13 @@ class DatabaseService {
             : "https://keysight-h.assetsadobe.com/is/image/content/dam/keysight/en/img/prd/ixia-homepage-redirect/network-visibility-and-network-test-products/Network-Test-Solutions-New.jpg",
         location: location,
         isOnline: isOnline,
-        facebookId: data["facebookId"],
-        organiser: organiser);
+        facebookId: facebookId,
+        organiser: organiser,
+      );
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
   }
 
   Future<void> setUserSpotifyToken(String uid, String spotifyAuthToken) async {
@@ -178,14 +188,19 @@ class DatabaseService {
         .update({"spotifyAuthToken": spotifyAuthToken});
   }
 
-  Future<User> getUser(String uid) {
+  Future<User> getUser(String uid) async {
     if (uid == null) return null;
-    return firestore.collection('users').doc(uid).get().then((value) => User(
-        email: value.data()["email"],
-        id: uid,
-        name: value.data()["name"],
-        facebookAuthToken: value.data()["authToken"],
-        spotifyAuthToken: value.data()["spotifyAuthToken"]));
+    var value = await firestore.collection('users').doc(uid).get();
+    if (value.exists)
+      return User(
+          email: value.data()["email"],
+          id: uid,
+          pfp: value.data()["profilePic"],
+          name: value.data()["name"],
+          facebookAuthToken: value.data()["authToken"],
+          spotifyAuthToken: value.data()["spotifyAuthToken"]);
+    else
+      return null;
   }
 
   void followEvent(Event event, String uid) {
