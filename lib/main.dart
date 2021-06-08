@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:stopor/auth/authentication_wrapper.dart';
 import 'auth/authentication_service.dart';
@@ -9,6 +10,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   //String host = Platform.isAndroid ? '10.0.2.2:8080' : 'localhost:8080';
   await Firebase.initializeApp();
+  SystemChrome.setEnabledSystemUIOverlays([]);
   //FirebaseFunctions functions = FirebaseFunctions.instance;
   // FirebaseFirestore.instance.settings =
   //   Settings(host: host, sslEnabled: false, persistenceEnabled: false);

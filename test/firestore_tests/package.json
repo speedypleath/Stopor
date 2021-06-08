@@ -1,0 +1,30 @@
+{
+  "name": "stopor",
+  "version": "1.0.0",
+  "description": "Unit testing for firestore",
+  "main": "test.js",
+  "directories": {
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha --exit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/speedypleath/Stopor.git"
+  },
+  "author": "speedypleath",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/speedypleath/Stopor/issues"
+  },
+  "homepage": "https://github.com/speedypleath/Stopor#readme",
+  "devDependencies": {
+    "mocha": "^9.0.0"
+  },
+  "dependencies": {
+    "@firebase/testing": "^0.20.11",
+    "firebase": "^8.6.5"
+  }
+}
