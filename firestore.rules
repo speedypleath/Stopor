@@ -1,9 +1,46 @@
 rules_version = '2';
+
+// function userIsValid(userId){
+//   exists(/databases/$(database)/documents/users/$(request.auth.uid))
+// }
 service cloud.firestore {
   match /databases/{database}/documents {
     match /{document=**} {
-      allow read, write: if
-          request.auth != null;
+      allow read: if
+        request.auth != null;
+      allow write: if false;
+    }
+
+    match /users/{userId} {
+      allow delete: if
+        request.auth.uid == resource.data.userId;
+      allow update: if
+        request.auth.uid == resource.data.userId;
+      allow write: if
+        request.auth != null &&
+        resource == null &&
+        request.resource.data.userId == request.auth.uid;
+    }
+
+    match /events/{eventId} {
+      allow delete: if
+        request.auth.uid == resource.data.organiser;
+      allow update: if
+        request.auth.uid == resource.data.organiser &&
+        !(request.resource.data.facebookId in resource.data)
+      allow write: if
+        request.auth != null && resource == null;
+    }
+
+    match /artists/{artistId} {
+      allow delete: if
+        request.auth.uid == resource.data.userId;
+      allow update: if
+        request.auth.uid == resource.data.userId &&
+        resource.data.spotifyId == request.resource.data.spotifyId &&
+        resource.data.userId == request.auth.uid;
+      allow write: if
+        request.auth != null && resource == null;
     }
   }
 }
