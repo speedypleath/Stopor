@@ -1,16 +1,23 @@
-# stopor
+# Stopor
+Android/IOS application written in Java that helps you find events and organize events.
 
-Event app.
+## App description
+# 1. User stories
+  1. As a user, I want to be able to search for events
+  2. As a user, I want to be notified when an event I follow is edited
+  3. As a user, I want to be able to follow artists
+  4. As a user, I want to be notified when 24 hours before an event
+  5. As an artist/organiser, I want to be able to post comments on my event
+  6. As a user I want to be able to save events
+  7. As a user/tourist, I want to be able to find events near me
+  8. As a artist I want my events to be categorised by genre
+  9. As a user, I want to be notified when an artist will organise an event near me
+  10. As an organizer, I want to be able to plan an event
+  11. As a user/tourist I want to know the location of an event
+  12. As an organizer I want to be able to edit an event
+  13. As an artist/venue manager/organiser I want to be able to add a description to my events
+  14. As a user, I want to be able to link my spotify/facebook account
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+# 2. Backlog
+  We monitorized our backlog creation using Jira. 
+  
