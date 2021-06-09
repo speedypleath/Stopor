@@ -13,6 +13,7 @@ class EventCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (event.eventImage == null) event.eventImage = "";
     var fadeInImage = FadeInImage.assetNetwork(
       image: event.eventImage,
       fit: BoxFit.fill,

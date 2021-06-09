@@ -53,5 +53,16 @@ service cloud.firestore {
         request.auth != null && resource == null && 
         isValidUser();
     }
+
+    match /following/{userId}/{document=**} {
+      allow delete: if
+        request.auth.uid == userId;
+      allow update: if
+        request.auth.uid == userId;
+      allow write: if
+        request.auth != null &&
+        resource == null &&
+        userId == request.auth.uid;
+    }
   }
 }

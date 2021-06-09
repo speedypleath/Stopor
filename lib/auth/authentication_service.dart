@@ -5,11 +5,17 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:http/http.dart' as http;
+import 'package:stopor/database/database_service.dart';
 
 class AuthenticationService {
   final FirebaseAuth _firebaseAuth;
 
-  AuthenticationService(this._firebaseAuth);
+  AuthenticationService(this._firebaseAuth) {
+    authStateChanges.listen((user) {
+      DatabaseService databaseService = DatabaseService();
+      databaseService.initialize(user.uid);
+    });
+  }
 
   Stream<User> get authStateChanges => _firebaseAuth.authStateChanges();
 

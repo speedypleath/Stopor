@@ -44,7 +44,7 @@ class _State extends State<BottomNav> {
 
   List<Widget> icons;
 
-  int _currentTab = 1;
+  int _currentTab = 0;
 
   final List _screens = [
     NewsFeed(),

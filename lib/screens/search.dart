@@ -1,6 +1,8 @@
 import 'package:algolia/algolia.dart';
 import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
 import 'package:flutter/material.dart';
+import 'package:stopor/auth/authentication_service.dart';
+import 'package:stopor/database/database_service.dart';
 import "../extension/string_extension.dart";
 import 'package:stopor/util/set_overlay.dart';
 import 'package:provider/provider.dart';
@@ -18,6 +20,7 @@ class _SearchScreenState extends State<SearchScreen> {
     super.initState();
   }
 
+  DatabaseService _databaseService = DatabaseService();
   TextEditingController _searchText = TextEditingController(text: "");
   List<AlgoliaObjectSnapshot> _results = [];
   bool _searching = false;
@@ -106,6 +109,42 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
+  bool checkIfFollowed(snap) {
+    switch (snap.data["documentType"]) {
+      case 'event':
+        return _databaseService.isEventFollowed(snap.data["objectID"]);
+        break;
+      case 'artist':
+        return _databaseService.isArtistFollowed(snap.data["objectId"]);
+        break;
+      default:
+        return false;
+    }
+  }
+
+  Future<bool> _followEntity(snap) async {
+    bool isFollowed = checkIfFollowed(snap);
+    switch (snap.data["documentType"]) {
+      case "event":
+        isFollowed
+            ? await _databaseService.unfollowEvent(snap.data["objectID"],
+                context.read<AuthenticationService>().getUser().uid)
+            : await _databaseService.followEventWithId(snap.data["objectID"],
+                context.read<AuthenticationService>().getUser().uid);
+        break;
+      case "artist":
+        isFollowed
+            ? await _databaseService.unfollowArtist(snap.data["objectID"],
+                context.read<AuthenticationService>().getUser().uid)
+            : await _databaseService.followArtist(snap.data["objectID"],
+                context.read<AuthenticationService>().getUser().uid);
+        break;
+      default:
+    }
+    setState(() {});
+    return isFollowed;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -123,6 +162,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   itemBuilder: (BuildContext ctx, int index) {
                     AlgoliaObjectSnapshot snap = _results[index];
                     String photoURL = snap.data["image"];
+                    bool isFollowed = checkIfFollowed(snap);
                     var image = photoURL != null
                         ? NetworkImage(photoURL)
                         : AssetImage("assets/images/default_pfp.jpg");
@@ -130,15 +170,23 @@ class _SearchScreenState extends State<SearchScreen> {
                       leading: CircleAvatar(
                         backgroundImage: image,
                       ),
-                      trailing:
-                          IconButton(icon: Icon(Icons.star), onPressed: () {}),
+                      trailing: IconButton(
+                        onPressed: () async {
+                          await _followEntity(snap);
+                        },
+                        icon: Icon(
+                          Icons.star,
+                          color: isFollowed
+                              ? Theme.of(context).accentColor
+                              : Colors.grey,
+                        ),
+                      ),
                       title: Text(snap.data["name"]),
                       subtitle: Text(
                           snap.data["documentType"].toString().capitalize()),
-                      onTap: () {},
                     );
                   },
-                ), // This trailing comma makes auto-formatting nicer for build methods.
+                ),
     );
   }
 }
