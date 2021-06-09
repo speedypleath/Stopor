@@ -25,14 +25,22 @@ describe("Authentication", () => {
     it("Can read from database if authenticated", async () => {
         const db = getFirestore(USER);
         const testDoc = db.collection("randomCollection").doc("testDoc");
+        const userDoc = db.collection("users").doc("speedypleath");
+        await firebase.assertSucceeds(userDoc.set({userId: "speedypleath"}));
         await firebase.assertSucceeds(testDoc.get());
+    });
+
+    after(async () => {
+        const db = getFirestore(USER);
+        const testDoc = db.collection("users").doc("speedypleath");
+        await testDoc.delete();
     });
 });
 
 describe("Users", () => {
-    it("Can write user if it doesn correspond to authenticated user", async () => {
+    it("Can write user if it does correspond to authenticated user", async () => {
         const db = getFirestore(USER);
-        const testDoc = db.collection("users").doc("testDoc");
+        const testDoc = db.collection("users").doc("speedypleath");
         await firebase.assertSucceeds(testDoc.set({userId: "speedypleath"}));
     });
 
@@ -44,26 +52,32 @@ describe("Users", () => {
 
     it("Can't modify user if it doesn't correspond to authenticated user", async () => {
         const db = getFirestore(ANOTHER_USER);
-        const testDoc = db.collection("users").doc("testDoc");
+        const testDoc = db.collection("users").doc("speedypleath");
         await firebase.assertFails(testDoc.update({ userId: "speedypleath" }));
     });
 
     it("Can modify user if it does correspond to authenticated user", async () => {
         const db = getFirestore(USER);
-        const testDoc = db.collection("users").doc("testDoc");
+        const testDoc = db.collection("users").doc("speedypleath");
         await firebase.assertSucceeds(testDoc.update({ bar: "foo", userId: "speedypleath"}));
     });
 
-    it("Can't modify user if it doesn't correspond to authenticated user", async () => {
+    it("Can't delete user if it doesn't correspond to authenticated user", async () => {
         const db = getFirestore(ANOTHER_USER);
-        const testDoc = db.collection("users").doc("testDoc");
+        const testDoc = db.collection("users").doc("speedypleath");
         await firebase.assertFails(testDoc.delete());
     });
 
-    it("Can't modify user if it doesn't correspond to authenticated user", async () => {
+    it("Can delete user if it does correspond to authenticated user", async () => {
         const db = getFirestore(USER);
-        const testDoc = db.collection("users").doc("testDoc");
+        const testDoc = db.collection("users").doc("speedypleath");
         await firebase.assertSucceeds(testDoc.delete());
+    });
+
+    after(async () => {
+        const db = getFirestore(USER);
+        const testDoc = db.collection("users").doc("speedypleath");
+        await firebase.assertSucceeds(testDoc.set({userId: "speedypleath"}));
     });
 });
 
@@ -84,6 +98,12 @@ describe("Events", () => {
         const db = getFirestore(USER);
         const testDoc = db.collection("events").doc("testDoc");
         await firebase.assertSucceeds(testDoc.update({ bar: "foo", facebookId: "123", organiser: "speedypleath"}));
+    });
+
+    it("Can follow event", async () => {
+        const db = getFirestore(ANOTHER_USER); 
+        const testDoc = db.collection("events").doc("testDoc");
+        await firebase.assertSucceeds(testDoc.update({ followersCount: firebase.firestore.FieldValue.increment(1)}));
     });
 
     it("Can't delete event if authenticated user is not the owner of requested event", async () => {
@@ -128,5 +148,11 @@ describe("Artists", () => {
         const db = getFirestore(USER);
         const testDoc = db.collection("artists").doc("testDoc");
         await firebase.assertSucceeds(testDoc.delete());
+    });
+
+    after(async () => {
+        const db = getFirestore(USER);
+        const testDoc = db.collection("users").doc("speedypleath");
+        await testDoc.delete();
     });
 });

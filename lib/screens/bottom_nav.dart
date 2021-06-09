@@ -1,3 +1,4 @@
+import 'package:algolia/algolia.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -7,6 +8,8 @@ import 'package:stopor/screens/search.dart';
 import 'package:stopor/screens/settings.dart';
 import 'package:stopor/util/set_overlay.dart';
 import 'package:provider/provider.dart';
+
+import '../api_keys.dart';
 
 class BottomNav extends StatefulWidget {
   @override
@@ -42,8 +45,13 @@ class _State extends State<BottomNav> {
   List<Widget> icons;
 
   int _currentTab = 0;
-  int _lastTab = 0;
-  final List _screens = [NewsFeed(), Container(), Scaffold(), SettingsPage()];
+
+  final List _screens = [
+    NewsFeed(),
+    SearchScreen(),
+    Scaffold(),
+    SettingsPage()
+  ];
 
   BottomNavigationBarItem _buildToolbarIcon(int index) {
     return BottomNavigationBarItem(
@@ -63,24 +71,6 @@ class _State extends State<BottomNav> {
         label: '');
   }
 
-  showSearchPage() async {
-    SchedulerBinding.instance.addPostFrameCallback((_) async {
-      showSearch<String>(
-        context: context,
-        delegate: NameSearch([]),
-      );
-    });
-  }
-
-  Widget buildBody() {
-    if (_currentTab != 1)
-      return _screens[_currentTab];
-    else {
-      showSearchPage();
-      return _screens[_lastTab];
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -90,9 +80,7 @@ class _State extends State<BottomNav> {
           currentIndex: _currentTab,
           onTap: (int value) {
             setState(() {
-              _lastTab = _currentTab;
-              _currentTab = value == 1 ? _lastTab : value;
-              if (value == 1) showSearchPage();
+              _currentTab = value;
             });
           },
           unselectedItemColor: Colors.grey,

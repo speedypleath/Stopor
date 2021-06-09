@@ -2,9 +2,12 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:stopor/models/artist.dart';
 import 'package:stopor/models/event.dart';
 import 'package:stopor/models/user.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
+
+import 'mapper.dart';
 
 class DatabaseService {
   DatabaseService._privateConstructor();
@@ -21,7 +24,10 @@ class DatabaseService {
   FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   List<Event> _followedEvents = [];
+  List<Artist> _followedArtists = [];
+  List<User> _followedUsers = [];
   String _uid;
+  Mapper _mapper = Mapper();
 
   Future<String> uploadPic(image) async {
     Reference ref = storage.ref().child("image" + DateTime.now().toString());
@@ -29,7 +35,7 @@ class DatabaseService {
     return uploadTask.ref.getDownloadURL();
   }
 
-  Future<void> uploadEvent(event) async {
+  Future<void> uploadEvent(Event event) async {
     firestore.collection('events').add(event.toJSON());
   }
 
@@ -47,6 +53,7 @@ class DatabaseService {
         var snapshot = await docRef.get();
         query = firestore
             .collection('events')
+            .where("documentId", whereNotIn: followedEvents)
             .startAfterDocument(snapshot)
             .limit(pageSize);
       } else {
@@ -60,7 +67,8 @@ class DatabaseService {
       try {
         await geoRef.forEach((List<DocumentSnapshot> documentList) {
           documentList.forEach((DocumentSnapshot doc) async {
-            Event event = await mapToEvent(doc.data(), doc.id);
+            _mapper.setEvent();
+            Event event = await _mapper.map(doc.data(), doc.id);
             events.add(event);
           });
         }).timeout(Duration(seconds: 1));
@@ -75,15 +83,48 @@ class DatabaseService {
 
   Future<List<Event>> getFollowedEventList(uid) async {
     try {
-      if (_followedEvents.isNotEmpty) return _followedEvents;
-      if (_uid == null) _uid = uid;
       var events = await firestore
+          .collection('following')
+          .doc(uid)
           .collection('events')
-          .where('followers.$uid', isEqualTo: true)
           .get();
 
-      _followedEvents = await mapToEventList(events.docs);
+      _mapper.setEvent();
+      _followedEvents = await _mapper.mapToObjectList<Event>(events.docs);
       return _followedEvents;
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
+  }
+
+  Future<List<Artist>> getFollowedArtistList(uid) async {
+    try {
+      var artists = await firestore
+          .collection('following')
+          .doc(uid)
+          .collection('artists')
+          .get();
+      _mapper.setArtist();
+      _followedArtists = await _mapper.mapToObjectList<Artist>(artists.docs);
+      print(_followedArtists);
+      return _followedArtists;
+    } catch (e) {
+      print(e.toString());
+      return null;
+    }
+  }
+
+  Future<List<User>> getFollowedUserList(uid) async {
+    try {
+      var users = await firestore
+          .collection('following')
+          .doc(uid)
+          .collection('users')
+          .get();
+      _mapper.setUser();
+      _followedUsers = await _mapper.mapToObjectList<User>(users.docs);
+      return _followedUsers;
     } catch (e) {
       print(e.toString());
       return null;
@@ -92,8 +133,6 @@ class DatabaseService {
 
   Future<List<Event>> getEventList(pageKey, pageSize, uid) async {
     try {
-      _uid = uid;
-      await getFollowedEventList(uid);
       List<String> followedEvents =
           _followedEvents.map((e) => e.id).cast<String>().toList();
       print(followedEvents);
@@ -131,50 +170,9 @@ class DatabaseService {
               .limit(pageSize)
               .get();
       }
-      List<Event> eventList = await mapToEventList(events.docs);
+      _mapper.setEvent();
+      var eventList = await _mapper.mapToObjectList<Event>(events.docs);
       return eventList;
-    } catch (e) {
-      print(e.toString());
-      return null;
-    }
-  }
-
-  Future mapToEventList(data) async {
-    List<Event> eventObjects = [];
-    await data.forEach((element) async {
-      Event event = await mapToEvent(element.data(), element.id);
-      eventObjects.add(event);
-    });
-    return eventObjects;
-  }
-
-  Future<Event> mapToEvent(data, id) async {
-    String organiser = data["organiser"];
-    bool isOnline;
-    String location;
-    if (data["location"] == null)
-      location = "";
-    else
-      location = data["location"]["name"];
-    if (data["isOnline"] == null)
-      isOnline = false;
-    else
-      isOnline = data["isOnline"];
-    String facebookId = data["facebookId"] == null ? "" : data["facebookId"];
-    try {
-      return new Event(
-        id: id,
-        description: data["description"],
-        date: DateTime(2020, 9, 17, 17, 30),
-        name: data["name"],
-        eventImage: data["image"] != false
-            ? data["image"]
-            : "https://keysight-h.assetsadobe.com/is/image/content/dam/keysight/en/img/prd/ixia-homepage-redirect/network-visibility-and-network-test-products/Network-Test-Solutions-New.jpg",
-        location: location,
-        isOnline: isOnline,
-        facebookId: facebookId,
-        organiser: organiser,
-      );
     } catch (e) {
       print(e.toString());
       return null;
@@ -206,13 +204,122 @@ class DatabaseService {
   void followEvent(Event event, String uid) {
     _followedEvents.add(event);
     firestore
-        .collection('users')
+        .collection('following')
         .doc(uid)
         .collection('events')
-        .add(event.toJSON());
+        .doc(event.id)
+        .set(event.toJSON());
     firestore.collection('events').doc(event.id).update({
-      "followers.$uid": true,
       "followersCount": FieldValue.increment(1),
     });
+  }
+
+  Future<void> followEventWithId(String eventId, String uid) async {
+    DocumentSnapshot snap =
+        await firestore.collection('events').doc(eventId).get();
+    _mapper.setEvent();
+    Event event = await _mapper.map(snap.data(), snap.id);
+    followEvent(event, uid);
+  }
+
+  Future<void> unfollowEvent(String eventId, String uid) async {
+    _followedEvents.removeWhere((element) => element.id == eventId);
+    firestore
+        .collection('following')
+        .doc(uid)
+        .collection('events')
+        .doc(eventId)
+        .delete();
+    firestore.collection('events').doc(eventId).update({
+      "followersCount": FieldValue.increment(-1),
+    });
+  }
+
+  Future<void> followArtist(String artistId, String uid) async {
+    DocumentSnapshot snap =
+        await firestore.collection('artists').doc(artistId).get();
+    _mapper.setArtist();
+    Artist artist = await _mapper.map(snap.data(), snap.id);
+    _followedArtists.add(artist);
+    firestore
+        .collection('following')
+        .doc(uid)
+        .collection('artists')
+        .doc(artistId)
+        .set(artist.toJSON());
+    firestore.collection('artists').doc(artistId).update({
+      "followersCount": FieldValue.increment(1),
+    });
+  }
+
+  Future<void> unfollowArtist(String artistId, String uid) async {
+    firestore
+        .collection('following')
+        .doc(uid)
+        .collection('artists')
+        .doc(artistId)
+        .delete();
+    _followedArtists.removeWhere((element) => element.id == artistId);
+    firestore.collection('artists').doc(artistId).update({
+      "followersCount": FieldValue.increment(-1),
+    });
+  }
+
+  Future<void> followUser(String followdUserId, String uid) async {
+    DocumentSnapshot snap =
+        await firestore.collection('users').doc(followdUserId).get();
+    _mapper.setUser();
+    User user = await _mapper.map(snap.data(), snap.id);
+    _followedUsers.add(user);
+    firestore
+        .collection('following')
+        .doc(uid)
+        .collection('users')
+        .doc(followdUserId)
+        .set(user.toJSON());
+    firestore.collection('users').doc(followdUserId).update({
+      "followersCount": FieldValue.increment(1),
+    });
+  }
+
+  Future<void> unfollowUser(String followdUserId, String uid) async {
+    firestore
+        .collection('following')
+        .doc(uid)
+        .collection('users')
+        .doc(followdUserId)
+        .delete();
+    _followedUsers.removeWhere((element) => element.id == followdUserId);
+    firestore.collection('users').doc(followdUserId).update({
+      "followersCount": FieldValue.increment(-1),
+    });
+  }
+
+  bool isEventFollowed(String eventId) {
+    for (Event event in _followedEvents) if (event.id == eventId) return true;
+    return false;
+  }
+
+  bool isArtistFollowed(String artistId) {
+    for (Artist artist in _followedArtists)
+      if (artist.id == artistId) return true;
+    return false;
+  }
+
+  bool isUserFollowed(String userId) {
+    for (User user in _followedUsers) if (user.id == userId) return true;
+    return false;
+  }
+
+  void initialize(uid) {
+    _uid = uid;
+    if (uid == null) {
+      _followedArtists = [];
+      _followedEvents = [];
+      _followedUsers = [];
+    }
+    getFollowedEventList(_uid);
+    getFollowedArtistList(_uid);
+    getFollowedUserList(_uid);
   }
 }

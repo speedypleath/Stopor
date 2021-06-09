@@ -1,10 +1,12 @@
 rules_version = '2';
 
-// function userIsValid(userId){
-//   exists(/databases/$(database)/documents/users/$(request.auth.uid))
-// }
 service cloud.firestore {
+
   match /databases/{database}/documents {
+    function isValidUser() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+    
     match /{document=**} {
       allow read: if
         request.auth != null;
@@ -13,34 +15,54 @@ service cloud.firestore {
 
     match /users/{userId} {
       allow delete: if
-        request.auth.uid == resource.data.userId;
+        request.auth.uid == userId;
       allow update: if
-        request.auth.uid == resource.data.userId;
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['followersCount']) || 
+        request.auth.uid == userId;
       allow write: if
-        request.auth != null &&
-        resource == null &&
-        request.resource.data.userId == request.auth.uid;
+        debug(request.auth) != null &&
+        debug(resource) == null &&
+        userId == request.auth.uid;
     }
 
     match /events/{eventId} {
       allow delete: if
-        request.auth.uid == resource.data.organiser;
+        request.auth.uid == resource.data.organiser && 
+        isValidUser();
       allow update: if
-        request.auth.uid == resource.data.organiser &&
-        !(request.resource.data.facebookId in resource.data)
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['followersCount']) || 
+        (request.auth.uid == resource.data.organiser &&
+        !(request.resource.data.facebookId in resource.data) && 
+        isValidUser());
       allow write: if
-        request.auth != null && resource == null;
+        request.auth != null && resource == null && 
+        isValidUser();
     }
 
     match /artists/{artistId} {
       allow delete: if
-        request.auth.uid == resource.data.userId;
+        request.auth.uid == resource.data.userId && 
+        isValidUser();
       allow update: if
-        request.auth.uid == resource.data.userId &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['followersCount']) || 
+        (request.auth.uid == resource.data.userId &&
         resource.data.spotifyId == request.resource.data.spotifyId &&
-        resource.data.userId == request.auth.uid;
+        resource.data.userId == request.auth.uid && 
+        isValidUser());
       allow write: if
-        request.auth != null && resource == null;
+        request.auth != null && resource == null && 
+        isValidUser();
+    }
+
+    match /following/{userId}/{document=**} {
+      allow delete: if
+        request.auth.uid == userId;
+      allow update: if
+        request.auth.uid == userId;
+      allow write: if
+        request.auth != null &&
+        resource == null &&
+        userId == request.auth.uid;
     }
   }
 }

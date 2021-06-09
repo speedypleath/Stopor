@@ -33,6 +33,7 @@ class Event {
       'location': location,
       'facebookId': facebookId,
       'followersCount': 0,
+      "documentType": "event",
     };
   }
 }

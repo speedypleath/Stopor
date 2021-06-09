@@ -33,6 +33,7 @@ function fetchUntilCondition(url, method, header) {
                       "name": artist["name"],
                       "genres": genresMap,
                       "image": artist["images"][1]["url"],
+                      "documentType": "artist",
                     });
                   } else {
                     val.docs[0].ref.update({
@@ -40,6 +41,7 @@ function fetchUntilCondition(url, method, header) {
                       "name": artist["name"],
                       "genres": genresMap,
                       "image": artist["images"][1]["url"],
+                      "documentType": "artist",
                     });
                   }
                 }
@@ -68,6 +70,7 @@ function importSpotifyArtists(authToken) {
 
 function importFacebookEvents(authToken) {
   FB.setAccessToken(authToken);
+  const result = [];
   FB.get("me/events", function(err, res) {
     const data = res["data"];
     for (const key in data) {
@@ -75,8 +78,9 @@ function importFacebookEvents(authToken) {
         const fetch = new Promise((resolve, reject) => {
           FB.get(data[key]["id"]+"?fields=cover,is_online",
               (err2, res2) => {
-                resolve({cover: res2["cover"]["source"],
-                  isOnline: res2["is_online"]});
+                resolve({cover: res2["cover"] !=
+                  null ? res2["cover"]["source"] : null,
+                isOnline: res2["is_online"]});
               });
         });
         fetch.then((fields) => {
@@ -84,11 +88,14 @@ function importFacebookEvents(authToken) {
               .where("facebookId", "==", data[key]["id"])
               .get().then((val) => {
                 let location = null;
-                if (data[key]["place"]["location"] != null) {
-                  const position = geo.point(
-                      parseFloat(data[key]["place"]["location"]["latitude"]),
-                      parseFloat(data[key]["place"]["location"]["longitude"]));
-                  location = {name: data[key]["place"]["name"], position};
+                if (data[key]["place"] != null) {
+                  if (data[key]["place"]["location"] != null) {
+                    const position = geo.point(
+                        parseFloat(data[key]["place"]["location"]["latitude"]),
+                        parseFloat(data[key]["place"]["location"]["longitude"]
+                        ));
+                    location = {name: data[key]["place"]["name"], position};
+                  }
                 }
                 if (val.empty) {
                   admin.firestore().collection("events").add({
@@ -99,6 +106,7 @@ function importFacebookEvents(authToken) {
                     "isOnline": fields["isOnline"],
                     "location": location,
                     "followersCount": 0,
+                    "documentType": "event",
                   });
                 } else {
                   val.docs[0].ref.update({
@@ -108,6 +116,7 @@ function importFacebookEvents(authToken) {
                     "isOnline": fields["isOnline"],
                     "location": location,
                     "followersCount": 0,
+                    "documentType": "event",
                   });
                 }
               }
@@ -115,7 +124,7 @@ function importFacebookEvents(authToken) {
         });
       }
     }
-    return null;
+    return result;
   });
 }
 
@@ -164,5 +173,5 @@ exports.importSpotifyArtistsInstant = functions.https.onCall(
 exports.setDocumentId = functions.firestore
     .document("events/{docId}")
     .onCreate((snap, context) => {
-      snap.ref.update({"documentId": context.params.docId});
+      return snap.ref.update({"documentId": context.params.docId});
     });
