@@ -26,7 +26,7 @@ class AuthenticationService {
   }
 
   Future<void> changeImage(String image) async {
-    _firebaseAuth.currentUser.updateProfile(photoURL: image);
+    _firebaseAuth.currentUser.updatePhotoURL(image);
     FirebaseFirestore.instance
         .collection('users')
         .doc(_firebaseAuth.currentUser.uid)
@@ -35,7 +35,7 @@ class AuthenticationService {
 
   Future<void> changeUsername(String username) async {
     await _firebaseAuth.currentUser
-        .updateProfile(displayName: username)
+        .updateDisplayName(username)
         .catchError((error) {
       print(error.toString());
     });
@@ -78,7 +78,7 @@ class AuthenticationService {
           .whenComplete(() => print("gata"));
       userRef.get().then((user) {
         if (!user.exists) {
-          _firebaseAuth.currentUser.updateProfile(displayName: profile["name"]);
+          _firebaseAuth.currentUser.updateDisplayName(profile["name"]);
           userRef.set({
             "authToken": result.accessToken.token,
             "email": profile["email"],
@@ -119,7 +119,7 @@ class AuthenticationService {
       await _firebaseAuth
           .createUserWithEmailAndPassword(email: email, password: password)
           .then((newUser) => {
-                newUser.user.updateProfile(displayName: username),
+                newUser.user.updateDisplayName(username),
                 FirebaseFirestore.instance
                     .collection('users')
                     .doc(newUser.user.uid)

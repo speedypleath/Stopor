@@ -1,3 +1,4 @@
+import 'package:algolia/algolia.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -7,6 +8,8 @@ import 'package:stopor/screens/search.dart';
 import 'package:stopor/screens/settings.dart';
 import 'package:stopor/util/set_overlay.dart';
 import 'package:provider/provider.dart';
+
+import '../api_keys.dart';
 
 class BottomNav extends StatefulWidget {
   @override
@@ -64,21 +67,16 @@ class _State extends State<BottomNav> {
   }
 
   showSearchPage() async {
+    Algolia algolia = APIKeys.algolia;
+    AlgoliaQuery query = algolia.instance.index('stopor');
+    AlgoliaQuerySnapshot snap = await query.getObjects();
+    List<String> names = snap.hits.map<String>((e) => e.data["name"]).toList();
     SchedulerBinding.instance.addPostFrameCallback((_) async {
       showSearch<String>(
         context: context,
-        delegate: NameSearch([]),
+        delegate: NameSearch(names),
       );
     });
-  }
-
-  Widget buildBody() {
-    if (_currentTab != 1)
-      return _screens[_currentTab];
-    else {
-      showSearchPage();
-      return _screens[_lastTab];
-    }
   }
 
   @override

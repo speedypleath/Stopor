@@ -1,11 +1,15 @@
 rules_version = '2';
 
 service cloud.firestore {
+
   match /databases/{database}/documents {
+    function isValidUser() {
+      return exists(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+    
     match /{document=**} {
       allow read: if
-        request.auth != null && 
-        exists(/databases/$(database)/documents/users/$(request.auth.uid));
+        request.auth != null;
       allow write: if false;
     }
 
@@ -15,36 +19,36 @@ service cloud.firestore {
       allow update: if
         request.auth.uid == userId;
       allow write: if
-        request.auth != null &&
-        resource == null &&
-        request.resource.id == request.auth.uid;
+        debug(request.auth) != null &&
+        debug(resource) == null &&
+        userId == request.auth.uid;
     }
 
     match /events/{eventId} {
       allow delete: if
         request.auth.uid == resource.data.organiser && 
-        exists(/databases/$(database)/documents/users/$(request.auth.uid));
+        isValidUser();
       allow update: if
         request.auth.uid == resource.data.organiser &&
         !(request.resource.data.facebookId in resource.data) && 
-        exists(/databases/$(database)/documents/users/$(request.auth.uid));
+        isValidUser();
       allow write: if
         request.auth != null && resource == null && 
-        exists(/databases/$(database)/documents/users/$(request.auth.uid));
+        isValidUser();
     }
 
     match /artists/{artistId} {
       allow delete: if
         request.auth.uid == resource.data.userId && 
-        exists(/databases/$(database)/documents/users/$(request.auth.uid));
+        isValidUser();
       allow update: if
         request.auth.uid == resource.data.userId &&
         resource.data.spotifyId == request.resource.data.spotifyId &&
         resource.data.userId == request.auth.uid && 
-        exists(/databases/$(database)/documents/users/$(request.auth.uid));
+        isValidUser();
       allow write: if
         request.auth != null && resource == null && 
-        exists(/databases/$(database)/documents/users/$(request.auth.uid));
+        isValidUser();
     }
   }
 }

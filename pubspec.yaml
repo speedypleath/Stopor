@@ -53,6 +53,7 @@ dependencies:
   test: ^1.16.8
   dcdg: ^3.1.0
   flutter_search_bar: ^2.1.0
+  algolia: ^1.0.1
 
 
 dev_dependencies:

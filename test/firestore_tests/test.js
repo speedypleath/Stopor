@@ -22,12 +22,6 @@ describe("Authentication", () => {
         await firebase.assertFails(testDoc.set({ foo: "bar" }));
     });
 
-    it("Can't read from database if authenticated doesn't exist", async () => {
-        const db = getFirestore(USER);
-        const testDoc = db.collection("randomCollection").doc("testDoc");
-        await firebase.assertFails(testDoc.get());
-    });
-
     it("Can read from database if authenticated", async () => {
         const db = getFirestore(USER);
         const testDoc = db.collection("randomCollection").doc("testDoc");
