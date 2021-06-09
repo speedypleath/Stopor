@@ -108,16 +108,6 @@ function importFacebookEvents(authToken) {
                     "followersCount": 0,
                     "documentType": "event",
                   });
-                  result.push({
-                    "facebookId": data[key]["id"],
-                    "name": data[key]["name"],
-                    "description": data[key]["description"],
-                    "image": fields["cover"],
-                    "isOnline": fields["isOnline"],
-                    "location": location,
-                    "followersCount": 0,
-                    "documentType": "event",
-                  });
                 } else {
                   val.docs[0].ref.update({
                     "name": data[key]["name"],
@@ -126,14 +116,7 @@ function importFacebookEvents(authToken) {
                     "isOnline": fields["isOnline"],
                     "location": location,
                     "followersCount": 0,
-                  });
-                  result.push({
-                    "name": data[key]["name"],
-                    "description": data[key]["description"],
-                    "image": fields["cover"],
-                    "isOnline": fields["isOnline"],
-                    "location": location,
-                    "followersCount": 0,
+                    "documentType": "event",
                   });
                 }
               }

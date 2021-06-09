@@ -29,7 +29,7 @@ class DatabaseService {
     return uploadTask.ref.getDownloadURL();
   }
 
-  Future<void> uploadEvent(event) async {
+  Future<void> uploadEvent(Event event) async {
     firestore.collection('events').add(event.toJSON());
   }
 

@@ -45,8 +45,13 @@ class _State extends State<BottomNav> {
   List<Widget> icons;
 
   int _currentTab = 0;
-  int _lastTab = 0;
-  final List _screens = [NewsFeed(), Container(), Scaffold(), SettingsPage()];
+
+  final List _screens = [
+    NewsFeed(),
+    SearchScreen(),
+    Scaffold(),
+    SettingsPage()
+  ];
 
   BottomNavigationBarItem _buildToolbarIcon(int index) {
     return BottomNavigationBarItem(
@@ -66,19 +71,6 @@ class _State extends State<BottomNav> {
         label: '');
   }
 
-  showSearchPage() async {
-    Algolia algolia = APIKeys.algolia;
-    AlgoliaQuery query = algolia.instance.index('stopor');
-    AlgoliaQuerySnapshot snap = await query.getObjects();
-    List<String> names = snap.hits.map<String>((e) => e.data["name"]).toList();
-    SchedulerBinding.instance.addPostFrameCallback((_) async {
-      showSearch<String>(
-        context: context,
-        delegate: NameSearch(names),
-      );
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -88,9 +80,7 @@ class _State extends State<BottomNav> {
           currentIndex: _currentTab,
           onTap: (int value) {
             setState(() {
-              _lastTab = _currentTab;
-              _currentTab = value == 1 ? _lastTab : value;
-              if (value == 1) showSearchPage();
+              _currentTab = value;
             });
           },
           unselectedItemColor: Colors.grey,
