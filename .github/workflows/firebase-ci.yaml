@@ -16,4 +16,4 @@ jobs:
         working-directory: test/firestore_tests
       - name: Run tests
         working-directory: test/firestore_tests
-        run: firebase emulators:exec 'npm test'
+        run: firebase emulators:exec --project stopor-f035c 'npm test'
