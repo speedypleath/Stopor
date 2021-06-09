@@ -17,6 +17,7 @@ service cloud.firestore {
       allow delete: if
         request.auth.uid == userId;
       allow update: if
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['followersCount']) || 
         request.auth.uid == userId;
       allow write: if
         debug(request.auth) != null &&
@@ -29,9 +30,10 @@ service cloud.firestore {
         request.auth.uid == resource.data.organiser && 
         isValidUser();
       allow update: if
-        request.auth.uid == resource.data.organiser &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['followersCount']) || 
+        (request.auth.uid == resource.data.organiser &&
         !(request.resource.data.facebookId in resource.data) && 
-        isValidUser();
+        isValidUser());
       allow write: if
         request.auth != null && resource == null && 
         isValidUser();
@@ -42,10 +44,11 @@ service cloud.firestore {
         request.auth.uid == resource.data.userId && 
         isValidUser();
       allow update: if
-        request.auth.uid == resource.data.userId &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['followersCount']) || 
+        (request.auth.uid == resource.data.userId &&
         resource.data.spotifyId == request.resource.data.spotifyId &&
         resource.data.userId == request.auth.uid && 
-        isValidUser();
+        isValidUser());
       allow write: if
         request.auth != null && resource == null && 
         isValidUser();

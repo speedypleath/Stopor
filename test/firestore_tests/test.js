@@ -100,6 +100,12 @@ describe("Events", () => {
         await firebase.assertSucceeds(testDoc.update({ bar: "foo", facebookId: "123", organiser: "speedypleath"}));
     });
 
+    it("Can follow event", async () => {
+        const db = getFirestore(ANOTHER_USER); 
+        const testDoc = db.collection("events").doc("testDoc");
+        await firebase.assertSucceeds(testDoc.update({ followersCount: firebase.firestore.FieldValue.increment(1)}));
+    });
+
     it("Can't delete event if authenticated user is not the owner of requested event", async () => {
         const db = getFirestore(ANOTHER_USER);
         const testDoc = db.collection("events").doc("testDoc");

@@ -1,7 +1,7 @@
 import 'package:algolia/algolia.dart';
 import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
 import 'package:flutter/material.dart';
-import 'package:stopor/auth/authentication_service.dart';
+import "../extension/string_extension.dart";
 import 'package:stopor/util/set_overlay.dart';
 import 'package:provider/provider.dart';
 import '../api_keys.dart';
@@ -45,67 +45,71 @@ class _SearchScreenState extends State<SearchScreen> {
     });
   }
 
+  AppBar _buildAppBar() {
+    return AppBar(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      actions: [
+        IconButton(
+          icon: Icon(Icons.clear),
+          onPressed: () {
+            _searchText.clear();
+          },
+        ),
+      ],
+      title: TextField(
+        autofocus: true,
+        controller: _searchText,
+        onChanged: (value) {
+          _text = value;
+          _search();
+        },
+      ),
+      bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(50.0),
+          child: DefaultTabController(
+            length: 4,
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
+              child: TabBar(
+                labelColor: Colors.white,
+                unselectedLabelColor: Colors.black,
+                tabs: [
+                  Text("All"),
+                  Text("Events"),
+                  Text("Artists"),
+                  Text("Users")
+                ],
+                indicator: BubbleTabIndicator(
+                  tabBarIndicatorSize: TabBarIndicatorSize.tab,
+                  indicatorHeight: 40,
+                  indicatorColor: Theme.of(context).accentColor,
+                ),
+                onTap: (index) {
+                  switch (index) {
+                    case 0:
+                      _fieldToSearch = "all";
+                      break;
+                    case 1:
+                      _fieldToSearch = "event";
+                      break;
+                    case 2:
+                      _fieldToSearch = "artist";
+                      break;
+                    default:
+                      _fieldToSearch = "user";
+                  }
+                  _search();
+                },
+              ),
+            ),
+          )),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-        actions: [
-          IconButton(
-            icon: Icon(Icons.clear),
-            onPressed: () {
-              _searchText.clear();
-            },
-          ),
-        ],
-        title: TextField(
-          autofocus: true,
-          controller: _searchText,
-          onChanged: (value) {
-            _text = value;
-            _search();
-          },
-        ),
-        bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(50.0),
-            child: DefaultTabController(
-              length: 4,
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 15),
-                child: TabBar(
-                  labelColor: Colors.white,
-                  unselectedLabelColor: Colors.black,
-                  tabs: [
-                    Text("All"),
-                    Text("Events"),
-                    Text("Artists"),
-                    Text("Users")
-                  ],
-                  indicator: BubbleTabIndicator(
-                    tabBarIndicatorSize: TabBarIndicatorSize.tab,
-                    indicatorHeight: 40,
-                    indicatorColor: Theme.of(context).accentColor,
-                  ),
-                  onTap: (index) {
-                    switch (index) {
-                      case 0:
-                        _fieldToSearch = "all";
-                        break;
-                      case 1:
-                        _fieldToSearch = "event";
-                        break;
-                      case 2:
-                        _fieldToSearch = "artist";
-                        break;
-                      default:
-                        _fieldToSearch = "user";
-                    }
-                    _search();
-                  },
-                ),
-              ),
-            )),
-      ),
+      appBar: _buildAppBar(),
       body: _searching == true
           ? Center(
               child: Text("Searching, please wait..."),
@@ -126,7 +130,12 @@ class _SearchScreenState extends State<SearchScreen> {
                       leading: CircleAvatar(
                         backgroundImage: image,
                       ),
+                      trailing:
+                          IconButton(icon: Icon(Icons.star), onPressed: () {}),
                       title: Text(snap.data["name"]),
+                      subtitle: Text(
+                          snap.data["documentType"].toString().capitalize()),
+                      onTap: () {},
                     );
                   },
                 ), // This trailing comma makes auto-formatting nicer for build methods.

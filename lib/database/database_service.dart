@@ -206,12 +206,11 @@ class DatabaseService {
   void followEvent(Event event, String uid) {
     _followedEvents.add(event);
     firestore
-        .collection('users')
+        .collection('following')
         .doc(uid)
         .collection('events')
         .add(event.toJSON());
     firestore.collection('events').doc(event.id).update({
-      "followers.$uid": true,
       "followersCount": FieldValue.increment(1),
     });
   }
