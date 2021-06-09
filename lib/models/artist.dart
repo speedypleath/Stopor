@@ -2,7 +2,7 @@ class Artist {
   String id;
   String name;
   String spotifyId;
-  List<dynamic> genres;
+  Map<String, bool> genres;
   String image;
   Artist({this.id, this.name, this.spotifyId, this.genres, this.image});
   Map<String, Object> toJSON() {
@@ -10,7 +10,7 @@ class Artist {
       'name': name,
       'genres': genres,
       'image': image,
-      'sporifyId': spotifyId,
+      'spotifyId': spotifyId,
       'followersCount': 0,
       "documentType": "artist",
     };

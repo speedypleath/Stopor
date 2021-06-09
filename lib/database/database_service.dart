@@ -107,6 +107,7 @@ class DatabaseService {
           .get();
       _mapper.setArtist();
       _followedArtists = await _mapper.mapToObjectList<Artist>(artists.docs);
+      print(_followedArtists);
       return _followedArtists;
     } catch (e) {
       print(e.toString());
@@ -239,6 +240,7 @@ class DatabaseService {
         await firestore.collection('artists').doc(artistId).get();
     _mapper.setArtist();
     Artist artist = await _mapper.map(snap.data(), snap.id);
+    _followedArtists.add(artist);
     firestore
         .collection('following')
         .doc(uid)
@@ -246,7 +248,7 @@ class DatabaseService {
         .doc(artistId)
         .set(artist.toJSON());
     firestore.collection('artists').doc(artistId).update({
-      "followersCount": FieldValue.increment(-1),
+      "followersCount": FieldValue.increment(1),
     });
   }
 
@@ -257,7 +259,38 @@ class DatabaseService {
         .collection('artists')
         .doc(artistId)
         .delete();
+    _followedArtists.removeWhere((element) => element.id == artistId);
     firestore.collection('artists').doc(artistId).update({
+      "followersCount": FieldValue.increment(-1),
+    });
+  }
+
+  Future<void> followUser(String followdUserId, String uid) async {
+    DocumentSnapshot snap =
+        await firestore.collection('users').doc(followdUserId).get();
+    _mapper.setUser();
+    User user = await _mapper.map(snap.data(), snap.id);
+    _followedUsers.add(user);
+    firestore
+        .collection('following')
+        .doc(uid)
+        .collection('users')
+        .doc(followdUserId)
+        .set(user.toJSON());
+    firestore.collection('users').doc(followdUserId).update({
+      "followersCount": FieldValue.increment(1),
+    });
+  }
+
+  Future<void> unfollowUser(String followdUserId, String uid) async {
+    firestore
+        .collection('following')
+        .doc(uid)
+        .collection('users')
+        .doc(followdUserId)
+        .delete();
+    _followedUsers.removeWhere((element) => element.id == followdUserId);
+    firestore.collection('users').doc(followdUserId).update({
       "followersCount": FieldValue.increment(-1),
     });
   }

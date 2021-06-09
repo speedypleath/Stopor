@@ -115,10 +115,10 @@ class _SearchScreenState extends State<SearchScreen> {
         return _databaseService.isEventFollowed(snap.data["objectID"]);
         break;
       case 'artist':
-        return _databaseService.isArtistFollowed(snap.data["objectId"]);
+        return _databaseService.isArtistFollowed(snap.data["objectID"]);
         break;
       default:
-        return false;
+        return _databaseService.isUserFollowed(snap.data["objectID"]);
     }
   }
 
@@ -140,6 +140,11 @@ class _SearchScreenState extends State<SearchScreen> {
                 context.read<AuthenticationService>().getUser().uid);
         break;
       default:
+        isFollowed
+            ? await _databaseService.unfollowUser(snap.data["objectID"],
+                context.read<AuthenticationService>().getUser().uid)
+            : await _databaseService.followUser(snap.data["objectID"],
+                context.read<AuthenticationService>().getUser().uid);
     }
     setState(() {});
     return isFollowed;

@@ -78,11 +78,12 @@ class EventMap implements MapStrategy {
 class ArtistMap implements MapStrategy {
   Future<Artist> map(data, id) async {
     try {
+      var genres = new Map<String, bool>.from(data["genres"]);
       return new Artist(
         id: id,
         name: data["name"],
         spotifyId: data["spotifyId"],
-        genres: Map<String, dynamic>.from(data["genres"]).keys.toList(),
+        genres: genres,
         image: data["image"],
       );
     } catch (e) {
