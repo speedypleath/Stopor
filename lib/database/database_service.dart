@@ -131,6 +131,15 @@ class DatabaseService {
     }
   }
 
+  Future<Event> getEvent(eventId) async {
+    var value = await firestore.collection('events').doc(eventId).get();
+    _mapper.setEvent();
+    if (value.exists)
+      return _mapper.map(value.data(), value.id);
+    else
+      return null;
+  }
+
   Future<List<Event>> getEventList(pageKey, pageSize, uid) async {
     try {
       List<String> followedEvents =
@@ -193,7 +202,7 @@ class DatabaseService {
       return User(
           email: value.data()["email"],
           id: uid,
-          pfp: value.data()["profilePic"],
+          pfp: value.data()["image"],
           name: value.data()["name"],
           facebookAuthToken: value.data()["authToken"],
           spotifyAuthToken: value.data()["spotifyAuthToken"]);
@@ -217,6 +226,9 @@ class DatabaseService {
   Future<void> followEventWithId(String eventId, String uid) async {
     DocumentSnapshot snap =
         await firestore.collection('events').doc(eventId).get();
+    firestore.collection('events').doc(eventId).update({
+      "followersCount": FieldValue.increment(1),
+    });
     _mapper.setEvent();
     Event event = await _mapper.map(snap.data(), snap.id);
     followEvent(event, uid);

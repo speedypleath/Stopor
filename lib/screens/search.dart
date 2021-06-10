@@ -3,6 +3,8 @@ import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:stopor/auth/authentication_service.dart';
 import 'package:stopor/database/database_service.dart';
+import 'package:stopor/models/event.dart';
+import 'package:stopor/screens/view_event.dart';
 import "../extension/string_extension.dart";
 import 'package:stopor/util/set_overlay.dart';
 import 'package:provider/provider.dart';
@@ -171,24 +173,39 @@ class _SearchScreenState extends State<SearchScreen> {
                     var image = photoURL != null
                         ? NetworkImage(photoURL)
                         : AssetImage("assets/images/default_pfp.jpg");
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundImage: image,
-                      ),
-                      trailing: IconButton(
-                        onPressed: () async {
-                          await _followEntity(snap);
-                        },
-                        icon: Icon(
-                          Icons.star,
-                          color: isFollowed
-                              ? Theme.of(context).accentColor
-                              : Colors.grey,
+                    return GestureDetector(
+                      onTap: () async {
+                        if (snap.data["documentType"] != "event") return;
+                        Event event = await _databaseService
+                            .getEvent(snap.data["objectID"]);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (BuildContext context) => ViewEvent(
+                              event: event,
+                            ),
+                          ),
+                        );
+                      },
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundImage: image,
                         ),
+                        trailing: IconButton(
+                          onPressed: () async {
+                            await _followEntity(snap);
+                          },
+                          icon: Icon(
+                            Icons.star,
+                            color: isFollowed
+                                ? Theme.of(context).accentColor
+                                : Colors.grey,
+                          ),
+                        ),
+                        title: Text(snap.data["name"]),
+                        subtitle: Text(
+                            snap.data["documentType"].toString().capitalize()),
                       ),
-                      title: Text(snap.data["name"]),
-                      subtitle: Text(
-                          snap.data["documentType"].toString().capitalize()),
                     );
                   },
                 ),

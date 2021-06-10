@@ -97,6 +97,7 @@ function importFacebookEvents(authToken) {
                     location = {name: data[key]["place"]["name"], position};
                   }
                 }
+                console.log(fields["cover"]);
                 if (val.empty) {
                   admin.firestore().collection("events").add({
                     "facebookId": data[key]["id"],
