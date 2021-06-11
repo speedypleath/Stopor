@@ -64,5 +64,9 @@ service cloud.firestore {
         resource == null &&
         userId == request.auth.uid;
     }
+
+    match /participation/{participationId} {
+      allow write: if true;
+    }
   }
 }

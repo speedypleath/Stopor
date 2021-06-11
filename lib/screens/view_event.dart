@@ -2,10 +2,12 @@ import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:stopor/auth/authentication_service.dart';
 import 'package:stopor/database/database_service.dart';
+import 'package:stopor/models/artist.dart';
 import 'package:stopor/models/event.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:stopor/models/user.dart';
 import 'package:stopor/screens/edit_event.dart';
+import 'package:stopor/screens/search_selector.dart';
 import 'package:stopor/util/set_overlay.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -321,10 +323,7 @@ class _ViewEventState extends State<ViewEvent> {
     );
   }
 
-  _buildEditEventButton(AsyncSnapshot<User> snapshot) {
-    if (!snapshot.hasData) return Container();
-    if (snapshot.data.id != context.read<AuthenticationService>().getUser().uid)
-      return Container();
+  _buildEditEventButton() {
     return OutlinedButton(
       style: OutlinedButton.styleFrom(
         fixedSize: Size(
@@ -353,77 +352,175 @@ class _ViewEventState extends State<ViewEvent> {
     );
   }
 
+  _buildAddArtistButton() {
+    return OutlinedButton(
+      style: OutlinedButton.styleFrom(
+        fixedSize: Size(
+          MediaQuery.of(context).size.width * 0.90,
+          MediaQuery.of(context).size.height * 0.06,
+        ),
+        primary: Colors.green,
+        backgroundColor: Colors.transparent,
+        side: BorderSide(
+          width: 1.0,
+          color: Colors.green,
+          style: BorderStyle.solid,
+        ),
+      ),
+      onPressed: () {
+        showSearch(context: context, delegate: ArtistsSelect(event.id));
+      },
+      child: Text("Add Artist"),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: FutureBuilder(
-          future: _databaseService.getUser(event.organiser), // async work
-          builder: (BuildContext context, AsyncSnapshot<User> snapshot) {
-            switch (snapshot.connectionState) {
-              case ConnectionState.waiting:
-                return Text('Loading....');
-              default:
-                if (snapshot.hasData) {
-                  String photoURL = snapshot.data.pfp;
-                  _image = photoURL != null
-                      ? Image.network(photoURL,
-                          width: 150.0, height: 150.0, fit: BoxFit.contain)
-                      : Image.asset("assets/images/default_pfp.jpg",
-                          width: 150.0, height: 150.0, fit: BoxFit.contain);
-                }
-                return NestedScrollView(
-                  headerSliverBuilder: _buildHeader,
-                  body: ListView(
-                    children: [
-                      _buildEventImage(),
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.02,
+        future: Future.wait([
+          _databaseService.getUser(event.organiser),
+          _databaseService.getEventArtists(event.id),
+        ]),
+        builder: (BuildContext context, AsyncSnapshot<List<dynamic>> snapshot) {
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting:
+              return Text('Loading....');
+            default:
+              User organiser;
+              List<Artist> artists;
+              bool hasOrganiser = false;
+              bool isOrganiser = false;
+              if (!snapshot.hasData) {
+                organiser = null;
+                artists = null;
+              }
+              if (snapshot.hasData && snapshot.data[1] != null)
+                artists = snapshot.data[1];
+
+              if (snapshot.hasData && snapshot.data[0] != null) {
+                hasOrganiser = true;
+                organiser = snapshot.data[0];
+                artists = snapshot.data[1];
+                isOrganiser = organiser.id ==
+                    context.read<AuthenticationService>().getUser().uid;
+                String photoURL = organiser.pfp;
+                _image = photoURL != null
+                    ? Image.network(photoURL,
+                        width: 150.0, height: 150.0, fit: BoxFit.contain)
+                    : Image.asset("assets/images/default_pfp.jpg",
+                        width: 150.0, height: 150.0, fit: BoxFit.contain);
+              }
+              return NestedScrollView(
+                headerSliverBuilder: _buildHeader,
+                body: ListView(
+                  children: [
+                    _buildEventImage(),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.02,
+                    ),
+                    _buildEventName(),
+                    Card(
+                      elevation: 0.3,
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      child: Column(
+                        children: [
+                          hasOrganiser
+                              ? _buildOrganiserRow(organiser)
+                              : Container(),
+                          _buildInfoRow(Icons.calendar_today, "Date",
+                              event.date.toString()),
+                          event.location != null
+                              ? _buildInfoRow(Icons.location_pin, "Location",
+                                  event.location)
+                              : _buildInfoRow(Icons.public, "Online Event", ""),
+                          event.facebookId != null
+                              ? GestureDetector(
+                                  child: _buildInfoRow(
+                                    Icons.face,
+                                    "Facebook",
+                                    "https://www.facebook.com/events/${event.facebookId}",
+                                  ),
+                                  onTap: () {
+                                    _launchURL(
+                                        "https://www.facebook.com/events/${event.facebookId}");
+                                  },
+                                )
+                              : Container(),
+                          isOrganiser ? _buildEditEventButton() : Container(),
+                          SizedBox(
+                            height: MediaQuery.of(context).size.height * 0.02,
+                          ),
+                        ],
                       ),
-                      _buildEventName(),
-                      Card(
-                        elevation: 0.3,
-                        color: Theme.of(context).scaffoldBackgroundColor,
-                        child: Column(
-                          children: [
-                            snapshot.hasData
-                                ? _buildOrganiserRow(snapshot.data)
-                                : Container(),
-                            _buildInfoRow(Icons.calendar_today, "Date",
-                                event.date.toString()),
-                            event.location != null
-                                ? _buildInfoRow(Icons.location_pin, "Location",
-                                    event.location)
-                                : _buildInfoRow(
-                                    Icons.public, "Online Event", ""),
-                            event.facebookId != null
-                                ? GestureDetector(
-                                    child: _buildInfoRow(
-                                      Icons.face,
-                                      "Facebook",
-                                      "https://www.facebook.com/events/${event.facebookId}",
-                                    ),
-                                    onTap: () {
-                                      _launchURL(
-                                          "https://www.facebook.com/events/${event.facebookId}");
-                                    },
-                                  )
-                                : Container(),
-                            _buildEditEventButton(snapshot),
-                            SizedBox(
-                              height: MediaQuery.of(context).size.height * 0.02,
+                    ),
+                    _buildEventDescription(),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.02,
+                    ),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: ClampingScrollPhysics(),
+                      itemCount: artists.length,
+                      itemBuilder: (context, i) {
+                        String photoURL = artists[i].image;
+                        bool isFollowing =
+                            _databaseService.isArtistFollowed(artists[i].id);
+                        var image = photoURL != null
+                            ? NetworkImage(photoURL)
+                            : AssetImage("assets/images/default_pfp.jpg");
+                        return ListTile(
+                          leading: CircleAvatar(
+                            backgroundImage: image,
+                          ),
+                          title: Text(artists[i].name),
+                          trailing: OutlinedButton(
+                            onPressed: () async {
+                              !isFollowing
+                                  ? await _databaseService.followArtist(
+                                      artists[i].id,
+                                      context
+                                          .read<AuthenticationService>()
+                                          .getUser()
+                                          .uid)
+                                  : await _databaseService.unfollowArtist(
+                                      artists[i].id,
+                                      context
+                                          .read<AuthenticationService>()
+                                          .getUser()
+                                          .uid);
+                              setState(() {});
+                            },
+                            child: !isFollowing
+                                ? Text("Follow")
+                                : Text("Following"),
+                            style: OutlinedButton.styleFrom(
+                              fixedSize: Size(
+                                MediaQuery.of(context).size.width * 0.3,
+                                MediaQuery.of(context).size.height * 0.05,
+                              ),
+                              primary: Colors.green,
+                              backgroundColor: Colors.transparent,
+                              side: BorderSide(
+                                width: 1.0,
+                                color: Colors.green,
+                                style: BorderStyle.solid,
+                              ),
                             ),
-                          ],
-                        ),
-                      ),
-                      _buildEventDescription(),
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height * 0.02,
-                      ),
-                    ],
-                  ),
-                );
-            }
-          }),
+                          ),
+                        );
+                      },
+                    ),
+                    isOrganiser ? _buildAddArtistButton() : Container(),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.02,
+                    ),
+                  ],
+                ),
+              );
+          }
+        },
+      ),
     );
   }
 }

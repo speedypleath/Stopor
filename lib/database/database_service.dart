@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:http/http.dart';
 import 'package:stopor/models/artist.dart';
 import 'package:stopor/models/event.dart';
 import 'package:stopor/models/user.dart';
@@ -37,6 +38,32 @@ class DatabaseService {
 
   Future<void> uploadEvent(Event event) async {
     firestore.collection('events').add(event.toJSON());
+  }
+
+  Future<void> addArtistToEvent(String artistId, String eventId) {
+    firestore.collection("participation").doc(artistId + eventId).set({
+      "artistId": artistId,
+      "eventId": eventId,
+    });
+  }
+
+  Future<List<Artist>> getEventArtists(String eventId) async {
+    QuerySnapshot snapshot = await firestore
+        .collection("participation")
+        .where("eventId", isEqualTo: eventId)
+        .get();
+    List<Artist> artists = [];
+    _mapper.setArtist();
+    await Future.forEach(snapshot.docs,
+        (QueryDocumentSnapshot participation) async {
+      DocumentSnapshot artist = await firestore
+          .collection("artists")
+          .doc(participation.data()["artistId"])
+          .get();
+      Artist mappedArtist = await _mapper.map(artist.data(), artist.id);
+      artists.add(mappedArtist);
+    });
+    return artists;
   }
 
   Future getNearbyEventList(pageKey, pageSize, uid, latitude, longitude) async {
