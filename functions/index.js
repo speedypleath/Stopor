@@ -70,8 +70,7 @@ function importSpotifyArtists(authToken) {
 
 function importFacebookEvents(authToken) {
   FB.setAccessToken(authToken);
-  const result = [];
-  FB.get("me/events", function(err, res) {
+  return FB.get("me/events", function(err, res) {
     const data = res["data"];
     for (const key in data) {
       if ({}.hasOwnProperty.call(data, key)) {
@@ -83,7 +82,7 @@ function importFacebookEvents(authToken) {
                 isOnline: res2["is_online"]});
               });
         });
-        fetch.then((fields) => {
+        return fetch.then((fields) => {
           admin.firestore().collection("events")
               .where("facebookId", "==", data[key]["id"])
               .get().then((val) => {
@@ -97,6 +96,7 @@ function importFacebookEvents(authToken) {
                     location = {name: data[key]["place"]["name"], position};
                   }
                 }
+                console.log(data[key]["start_time"]);
                 if (val.empty) {
                   admin.firestore().collection("events").add({
                     "facebookId": data[key]["id"],
@@ -105,6 +105,8 @@ function importFacebookEvents(authToken) {
                     "image": fields["cover"],
                     "isOnline": fields["isOnline"],
                     "location": location,
+                    "date": admin.firestore.Timestamp
+                        .fromDate(new Date(data[key]["start_time"])),
                     "followersCount": 0,
                     "documentType": "event",
                   });
@@ -114,17 +116,20 @@ function importFacebookEvents(authToken) {
                     "description": data[key]["description"],
                     "image": fields["cover"],
                     "isOnline": fields["isOnline"],
+                    "date": admin.firestore.Timestamp
+                        .fromDate(new Date(data[key]["start_time"])),
                     "location": location,
-                    "followersCount": 0,
                     "documentType": "event",
                   });
                 }
               }
-              ).catch((err) => console.log(err));
+              ).catch((err) => {
+                console.log(err);
+                return err;
+              }).finally(() => "succes");
         });
       }
     }
-    return result;
   });
 }
 
@@ -135,7 +140,7 @@ exports.syncFacebookEventsPeridodic = functions.pubsub.schedule("0 14 * * *")
     .onRun(() => {
       admin.firestore().collection("users").get().then((query) => {
         query.docs.forEach((user) => {
-          importFacebookEvents(user.data().authToken);
+          importFacebookEvents(user.data()["authToken"]);
         });
       });
     });

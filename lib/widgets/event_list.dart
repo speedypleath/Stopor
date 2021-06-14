@@ -50,19 +50,22 @@ class _EventListState extends State<EventList> {
     return PagedSliverList<String, Event>(
       pagingController: _pagingController,
       builderDelegate: PagedChildBuilderDelegate<Event>(
-        itemBuilder: (context, item, index) => EventCard(
-            event: item,
-            button: ElevatedButton.icon(
-              label: Text("Save"),
-              icon: Icon(Icons.star),
-              onPressed: () {
-                _database.followEvent(
-                    _pagingController.itemList.elementAt(index), _user);
-                setState(() {
-                  _pagingController.itemList.removeAt(index);
-                });
-              },
-            )),
+        itemBuilder: (context, item, index) => item != null
+            ? EventCard(
+                event: item,
+                button: ElevatedButton.icon(
+                  label: Text("Save"),
+                  icon: Icon(Icons.star),
+                  onPressed: () {
+                    _database.followEvent(
+                        _pagingController.itemList.elementAt(index), _user);
+                    setState(() {
+                      _pagingController.itemList.removeAt(index);
+                    });
+                  },
+                ),
+              )
+            : Container(),
       ),
     );
   }

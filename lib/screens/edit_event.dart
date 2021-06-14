@@ -4,11 +4,13 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_place_picker/google_maps_place_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:stopor/auth/authentication_service.dart';
 import 'package:stopor/database/database_service.dart';
 import 'package:stopor/models/event.dart';
 import 'package:stopor/util/set_overlay.dart';
 import 'package:stopor/widgets/fade_background.dart';
 import 'package:stopor/widgets/form_row.dart';
+import 'package:provider/provider.dart';
 import '../api_keys.dart';
 import 'edit_field.dart';
 
@@ -115,6 +117,9 @@ class _EditEvent extends State<EditEvent> {
 
   @override
   Widget build(BuildContext context) {
+    event.organiser = event.organiser == null
+        ? context.read<AuthenticationService>().getUser().uid
+        : event.organiser;
     String title = event == null ? "Add Event" : "Edit event";
     return Scaffold(
       appBar: AppBar(

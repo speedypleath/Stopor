@@ -1,5 +1,3 @@
-import 'package:stopor/models/user.dart';
-
 class Event {
   String eventImage;
   String description;
@@ -34,6 +32,7 @@ class Event {
       'facebookId': facebookId,
       'followersCount': 0,
       "documentType": "event",
+      'organiser': organiser,
     };
   }
 }
