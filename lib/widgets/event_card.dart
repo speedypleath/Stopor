@@ -57,8 +57,10 @@ class EventCard extends StatelessWidget {
                                       color: Colors.black),
                                 ),
                                 Text(
-                                  DateFormat('y MMMM d hh:mm a')
-                                      .format(event.date),
+                                  event.date != null
+                                      ? DateFormat('y MMMM d hh:mm a')
+                                          .format(event.date)
+                                      : "Unknown date",
                                   style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 15,

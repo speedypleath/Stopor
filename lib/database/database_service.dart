@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:http/http.dart';
 import 'package:stopor/models/artist.dart';
 import 'package:stopor/models/event.dart';
 import 'package:stopor/models/user.dart';
@@ -40,7 +39,7 @@ class DatabaseService {
     firestore.collection('events').add(event.toJSON());
   }
 
-  Future<void> addArtistToEvent(String artistId, String eventId) {
+  void addArtistToEvent(String artistId, String eventId) {
     firestore.collection("participation").doc(artistId + eventId).set({
       "artistId": artistId,
       "eventId": eventId,
@@ -169,45 +168,48 @@ class DatabaseService {
 
   Future<List<Event>> getEventList(pageKey, pageSize, uid) async {
     try {
+      if (_followedEvents.isEmpty)
+        _followedEvents = await getFollowedEventList(uid);
       List<String> followedEvents =
           _followedEvents.map((e) => e.id).cast<String>().toList();
       print(followedEvents);
       var events;
-      if (pageKey != "") {
-        var docRef = firestore.collection('events').doc(pageKey);
-        var snapshot = await docRef.get();
-        events = firestore.collection('events');
-
-        if (followedEvents.isNotEmpty)
-          events = events
-              .where("documentId", whereNotIn: followedEvents)
-              .orderBy("documentId");
-
-        events = await events
-            .orderBy("followersCount")
-            .startAfterDocument(snapshot)
-            .limit(pageSize)
-            .get();
-      } else {
-        events = await firestore.collection('events').limit(pageSize).get();
-        print(events);
-        if (followedEvents.isNotEmpty)
+      List<Event> eventList = [];
+      while (eventList.length < pageSize) {
+        if (pageKey != "") {
+          var docRef = firestore.collection('events').doc(pageKey);
+          var snapshot = await docRef.get();
           events = await firestore
               .collection('events')
-              .where("documentId", whereNotIn: followedEvents)
-              .orderBy("documentId")
-              .orderBy("followersCount")
+              .orderBy("followersCount", descending: true)
+              .startAfterDocument(snapshot)
               .limit(pageSize)
               .get();
-        else
+        } else {
           events = await firestore
               .collection('events')
-              .orderBy("followersCount")
+              .orderBy("followersCount", descending: true)
               .limit(pageSize)
               .get();
+        }
+        _mapper.setEvent();
+        var queriedEvents = await _mapper.mapToObjectList<Event>(events.docs);
+        if (queriedEvents.isNotEmpty) {
+          pageKey = queriedEvents.last.id;
+          queriedEvents = queriedEvents
+              .where((event) => !followedEvents.contains(event.id))
+              .toList();
+
+          eventList.insertAll(eventList.length, queriedEvents);
+        } else {
+          queriedEvents = queriedEvents
+              .where((event) => !followedEvents.contains(event.id))
+              .toList();
+
+          eventList.insertAll(eventList.length, queriedEvents);
+          break;
+        }
       }
-      _mapper.setEvent();
-      var eventList = await _mapper.mapToObjectList<Event>(events.docs);
       return eventList;
     } catch (e) {
       print(e.toString());

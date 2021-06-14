@@ -31,7 +31,7 @@ class _AddEvent extends State<AddEvent> {
         children: [
           SizedBox(
             width: MediaQuery.of(context).size.width,
-            height: 180,
+            height: 130,
             child: FadedBackground(
               onTap: (context) => Navigator.push(
                   context,
@@ -43,8 +43,7 @@ class _AddEvent extends State<AddEvent> {
                   child: FormRow(
                     icon: Icons.edit,
                     title: "Online event",
-                    text:
-                        "Add an external link for your event adfjasdfdfgggggggggggggggggggggggggggggggggggggjhASDJKLFSFGDJKLASDGjklahsdfjlash fashdfkljasdfhadfljasdhjkl",
+                    text: "Add an external link for your event",
                   ),
                 ),
               ),

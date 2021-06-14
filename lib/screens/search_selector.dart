@@ -1,9 +1,7 @@
 import 'package:algolia/algolia.dart';
 import 'package:flutter/material.dart';
 import 'package:stopor/api_keys.dart';
-import 'package:stopor/auth/authentication_service.dart';
 import 'package:stopor/database/database_service.dart';
-import 'package:provider/provider.dart';
 
 class ArtistsSelect extends SearchDelegate<String> {
   ArtistsSelect(String eventId) {
