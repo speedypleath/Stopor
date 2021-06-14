@@ -41,25 +41,53 @@ Android/IOS application written in Java that helps you find events and organize 
 
 ## 4. Screens
   ### News feed 
-  <img src="https://user-images.githubusercontent.com/61271015/121922044-43905480-cd42-11eb-8463-d597e2832251.jpeg" width="350" height="700" />
+  <img src="https://user-images.githubusercontent.com/61271015/121922044-43905480-cd42-11eb-8463-d597e2832251.jpeg" width="270" height="480" />
   
   ### Settings
-  <img src="https://user-images.githubusercontent.com/61271015/121922874-08425580-cd43-11eb-93c8-136bf481c003.jpeg" width="350" height="700" />
-  <img src="https://user-images.githubusercontent.com/61271015/121922880-0a0c1900-cd43-11eb-90c4-eb342f4ba086.jpeg" width="350" height="700" />
+  <table>
+  <tr>
+    <td>Settings</td>
+     <td>Settings</td>
+  </tr>
+  <tr>
+    <td><img src="https://user-images.githubusercontent.com/61271015/121922874-08425580-cd43-11eb-93c8-136bf481c003.jpeg" width="270" height="480" /></td>
+    <td><img src="https://user-images.githubusercontent.com/61271015/121922880-0a0c1900-cd43-11eb-90c4-eb342f4ba086.jpeg" width="270" height="480" /></td>
+  </tr>
+ </table>
 
+    
   ### Add event
-  <img src="https://user-images.githubusercontent.com/61271015/121924112-47bd7180-cd44-11eb-92fe-5b37373acb40.jpeg"  width="350" height="700"/>
-  <img src="https://user-images.githubusercontent.com/61271015/121923437-9ae2f480-cd43-11eb-9e84-07c2c7c16c43.jpeg"  width="350" height="700"/>
-  <img src="https://user-images.githubusercontent.com/61271015/121923452-9ddde500-cd43-11eb-917e-2741e9c9f9dd.jpeg" width="350" height="700" />
-  <img src="https://user-images.githubusercontent.com/61271015/121923585-c2d25800-cd43-11eb-9df8-4def795c55a3.jpeg" width="350" height="700" />
+  <table>
+  <tr>
+    <td>Select event type</td>
+     <td>Add event</td>
+     <td>Select location</td>
+     <td>Select image</td>
+  </tr>
+  <tr>
+    <td><img src="https://user-images.githubusercontent.com/61271015/121924112-47bd7180-cd44-11eb-92fe-5b37373acb40.jpeg"  width="270" height="480"/></td>
+    <td><img src="https://user-images.githubusercontent.com/61271015/121923437-9ae2f480-cd43-11eb-9e84-07c2c7c16c43.jpeg"  width="270" height="480"/></td>
+    <td><img src="https://user-images.githubusercontent.com/61271015/121923452-9ddde500-cd43-11eb-917e-2741e9c9f9dd.jpeg" width="270" height="480" /></td>
+    <td> <img src="https://user-images.githubusercontent.com/61271015/121923585-c2d25800-cd43-11eb-9df8-4def795c55a3.jpeg" width="270" height="480" /> </td>
+  </tr>
+ </table>
   
   ### View event
-  <img src="https://user-images.githubusercontent.com/61271015/121923754-e7c6cb00-cd43-11eb-806f-c08d107e0c39.jpeg"  width="350" height="700"/>
-  <img src="https://user-images.githubusercontent.com/61271015/121923757-e8f7f800-cd43-11eb-90f3-2aacbc4ee633.jpeg" width="350" height="700" />
-  <img src="https://user-images.githubusercontent.com/61271015/121923768-ebf2e880-cd43-11eb-8561-8cbc77668049.jpeg" width="350" height="700" />
+  <table>
+  <tr>
+    <td>View event</td>
+     <td>View event as owner</td>
+     <td>Add artist to event</td>
+  </tr>
+  <tr>
+    <td><img src="https://user-images.githubusercontent.com/61271015/121923754-e7c6cb00-cd43-11eb-806f-c08d107e0c39.jpeg"  width="270" height="480"/></td>
+    <td><img src="https://user-images.githubusercontent.com/61271015/121923757-e8f7f800-cd43-11eb-90f3-2aacbc4ee633.jpeg" width="270" height="480" /></td>
+    <td><img src="https://user-images.githubusercontent.com/61271015/121923768-ebf2e880-cd43-11eb-8561-8cbc77668049.jpeg" width="270" height="480" /></td>
+  </tr>
+ </table>
 
   ### Search page
-  <img src="https://user-images.githubusercontent.com/61271015/121924020-307e8400-cd44-11eb-9ba2-8977c23bca9d.jpeg" width="350" height="700" />
+  <img src="https://user-images.githubusercontent.com/61271015/121924020-307e8400-cd44-11eb-9ba2-8977c23bca9d.jpeg" width="270" height="480" />
 
 # Design patterns
 ## Singleton (Factory Constructor)
