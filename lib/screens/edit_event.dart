@@ -120,7 +120,7 @@ class _EditEvent extends State<EditEvent> {
     event.organiser = event.organiser == null
         ? context.read<AuthenticationService>().getUser().uid
         : event.organiser;
-    String title = event == null ? "Add Event" : "Edit event";
+    String title = (event == null ? "Add Event" : "Edit event");
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
