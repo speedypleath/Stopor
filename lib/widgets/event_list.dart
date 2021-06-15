@@ -23,7 +23,7 @@ class _EventListState extends State<EventList> {
 
   _EventListState();
   final PagingController<String, Event> _pagingController =
-      PagingController(firstPageKey: "");
+  PagingController(firstPageKey: "");
   final DatabaseService _database = new DatabaseService();
   String _user;
   final int _pageSize = 5;
@@ -31,7 +31,7 @@ class _EventListState extends State<EventList> {
     try {
       DatabaseService databaseService = DatabaseService();
       final newItems =
-          await databaseService.getEventList(pageKey, _pageSize, _user);
+      await databaseService.getEventList(pageKey, _pageSize, _user);
       final isLastPage = newItems.length < _pageSize;
       if (isLastPage) {
         _pagingController.appendLastPage(newItems);
@@ -52,19 +52,19 @@ class _EventListState extends State<EventList> {
       builderDelegate: PagedChildBuilderDelegate<Event>(
         itemBuilder: (context, item, index) => item != null
             ? EventCard(
-                event: item,
-                button: ElevatedButton.icon(
-                  label: Text("Save"),
-                  icon: Icon(Icons.star),
-                  onPressed: () {
-                    _database.followEvent(
-                        _pagingController.itemList.elementAt(index), _user);
-                    setState(() {
-                      _pagingController.itemList.removeAt(index);
-                    });
-                  },
-                ),
-              )
+          event: item,
+          button: ElevatedButton.icon(
+            label: Text("Save"),
+            icon: Icon(Icons.star),
+            onPressed: () {
+              _database.followEvent(
+                  _pagingController.itemList.elementAt(index), _user);
+              setState(() {
+                _pagingController.itemList.removeAt(index);
+              });
+            },
+          ),
+        )
             : Container(),
       ),
     );

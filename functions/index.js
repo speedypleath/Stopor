@@ -5,7 +5,8 @@ const admin = require("firebase-admin");
 const fetch = require("node-fetch");
 admin.initializeApp();
 const geo = require("geofirex").init(admin);
-
+var msgData;
+exports.offerTrigger = functions.firestore.document
 function fetchUntilCondition(url, method, header) {
   fetch(url, {
     method: method,

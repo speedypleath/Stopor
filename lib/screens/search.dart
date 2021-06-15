@@ -1,12 +1,13 @@
 import 'package:algolia/algolia.dart';
 import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
 import 'package:flutter/material.dart';
+import 'package:settings_ui/settings_ui.dart';
 import 'package:stopor/auth/authentication_service.dart';
 import 'package:stopor/database/database_service.dart';
 import 'package:stopor/models/event.dart';
 import 'package:stopor/screens/view_event.dart';
 import "../extension/string_extension.dart";
-
+import 'languages_screen.dart';
 import 'package:stopor/util/set_overlay.dart';
 import 'package:provider/provider.dart';
 import '../api_keys.dart';
@@ -214,14 +215,7 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 }
 
-
-
-
-
-
 // added in fork
-
-import 'languages_screen.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -245,10 +239,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 subtitle: 'English',
                 leading: Icon(Icons.language),
                 onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => LanguagesScreen()));
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (BuildContext context) => LanguagesScreen()));
                 },
               ),
-              SettingsTile(title: 'Environment', subtitle: 'Production', leading: Icon(Icons.cloud_queue)),
+              SettingsTile(
+                  title: 'Environment',
+                  subtitle: 'Production',
+                  leading: Icon(Icons.cloud_queue)),
             ],
           ),
           SettingsSection(
@@ -272,7 +270,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   });
                 },
               ),
-              SettingsTile.switchTile(title: 'Use fingerprint', leading: Icon(Icons.fingerprint), onToggle: (bool value) {}, switchValue: false),
+              SettingsTile.switchTile(
+                  title: 'Use fingerprint',
+                  leading: Icon(Icons.fingerprint),
+                  onToggle: (bool value) {},
+                  switchValue: false),
               SettingsTile.switchTile(
                 title: 'Change password',
                 leading: Icon(Icons.lock),
@@ -284,8 +286,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           SettingsSection(
             title: 'Misc',
             tiles: [
-              SettingsTile(title: 'Terms of Service', leading: Icon(Icons.description)),
-              SettingsTile(title: 'Open source licenses', leading: Icon(Icons.collections_bookmark)),
+              SettingsTile(
+                  title: 'Terms of Service', leading: Icon(Icons.description)),
+              SettingsTile(
+                  title: 'Open source licenses',
+                  leading: Icon(Icons.collections_bookmark)),
             ],
           )
         ],
