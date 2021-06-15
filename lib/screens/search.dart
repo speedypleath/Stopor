@@ -132,23 +132,23 @@ class _SearchScreenState extends State<SearchScreen> {
       case "event":
         isFollowed
             ? await _databaseService.unfollowEvent(snap.data["objectID"],
-            context.read<AuthenticationService>().getUser().uid)
+                context.read<AuthenticationService>().getUser().uid)
             : await _databaseService.followEventWithId(snap.data["objectID"],
-            context.read<AuthenticationService>().getUser().uid);
+                context.read<AuthenticationService>().getUser().uid);
         break;
       case "artist":
         isFollowed
             ? await _databaseService.unfollowArtist(snap.data["objectID"],
-            context.read<AuthenticationService>().getUser().uid)
+                context.read<AuthenticationService>().getUser().uid)
             : await _databaseService.followArtist(snap.data["objectID"],
-            context.read<AuthenticationService>().getUser().uid);
+                context.read<AuthenticationService>().getUser().uid);
         break;
       default:
         isFollowed
             ? await _databaseService.unfollowUser(snap.data["objectID"],
-            context.read<AuthenticationService>().getUser().uid)
+                context.read<AuthenticationService>().getUser().uid)
             : await _databaseService.followUser(snap.data["objectID"],
-            context.read<AuthenticationService>().getUser().uid);
+                context.read<AuthenticationService>().getUser().uid);
     }
     setState(() {});
     return isFollowed;
@@ -160,69 +160,62 @@ class _SearchScreenState extends State<SearchScreen> {
       appBar: _buildAppBar(),
       body: _searching == true
           ? Center(
-        child: Text("Searching, please wait..."),
-      )
+              child: Text("Searching, please wait..."),
+            )
           : _results.length == 0
-          ? Center(
-        child: Text("No results found."),
-      )
-          : ListView.builder(
-        itemCount: _results.length,
-        itemBuilder: (BuildContext ctx, int index) {
-          AlgoliaObjectSnapshot snap = _results[index];
-          String photoURL = snap.data["image"];
-          bool isFollowed = checkIfFollowed(snap);
-          var image = photoURL != null
-              ? NetworkImage(photoURL)
-              : AssetImage("assets/images/default_pfp.jpg");
-          return GestureDetector(
-            onTap: () async {
-              if (snap.data["documentType"] != "event") return;
-              Event event = await _databaseService
-                  .getEvent(snap.data["objectID"]);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (BuildContext context) => ViewEvent(
-                    event: event,
-                  ),
+              ? Center(
+                  child: Text("No results found."),
+                )
+              : ListView.builder(
+                  itemCount: _results.length,
+                  itemBuilder: (BuildContext ctx, int index) {
+                    AlgoliaObjectSnapshot snap = _results[index];
+                    String photoURL = snap.data["image"];
+                    bool isFollowed = checkIfFollowed(snap);
+                    var image = photoURL != null
+                        ? NetworkImage(photoURL)
+                        : AssetImage("assets/images/default_pfp.jpg");
+                    return GestureDetector(
+                      onTap: () async {
+                        if (snap.data["documentType"] != "event") return;
+                        Event event = await _databaseService
+                            .getEvent(snap.data["objectID"]);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (BuildContext context) => ViewEvent(
+                              event: event,
+                            ),
+                          ),
+                        );
+                      },
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundImage: image,
+                        ),
+                        trailing: IconButton(
+                          onPressed: () async {
+                            await _followEntity(snap);
+                          },
+                          icon: Icon(
+                            Icons.star,
+                            color: isFollowed
+                                ? Theme.of(context).accentColor
+                                : Colors.grey,
+                          ),
+                        ),
+                        title: Text(snap.data["name"]),
+                        subtitle: Text(
+                            snap.data["documentType"].toString().capitalize()),
+                      ),
+                    );
+                  },
                 ),
-              );
-            },
-            child: ListTile(
-              leading: CircleAvatar(
-                backgroundImage: image,
-              ),
-              trailing: IconButton(
-                onPressed: () async {
-                  await _followEntity(snap);
-                },
-                icon: Icon(
-                  Icons.star,
-                  color: isFollowed
-                      ? Theme.of(context).accentColor
-                      : Colors.grey,
-                ),
-              ),
-              title: Text(snap.data["name"]),
-              subtitle: Text(
-                  snap.data["documentType"].toString().capitalize()),
-            ),
-          );
-        },
-      ),
     );
   }
 }
 
-
-
-
-
-
 // added in fork
-
-
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -246,10 +239,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 subtitle: 'English',
                 leading: Icon(Icons.language),
                 onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => LanguagesScreen()));
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (BuildContext context) => LanguagesScreen()));
                 },
               ),
-              SettingsTile(title: 'Environment', subtitle: 'Production', leading: Icon(Icons.cloud_queue)),
+              SettingsTile(
+                  title: 'Environment',
+                  subtitle: 'Production',
+                  leading: Icon(Icons.cloud_queue)),
             ],
           ),
           SettingsSection(
@@ -273,7 +270,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   });
                 },
               ),
-              SettingsTile.switchTile(title: 'Use fingerprint', leading: Icon(Icons.fingerprint), onToggle: (bool value) {}, switchValue: false),
+              SettingsTile.switchTile(
+                  title: 'Use fingerprint',
+                  leading: Icon(Icons.fingerprint),
+                  onToggle: (bool value) {},
+                  switchValue: false),
               SettingsTile.switchTile(
                 title: 'Change password',
                 leading: Icon(Icons.lock),
@@ -285,8 +286,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           SettingsSection(
             title: 'Misc',
             tiles: [
-              SettingsTile(title: 'Terms of Service', leading: Icon(Icons.description)),
-              SettingsTile(title: 'Open source licenses', leading: Icon(Icons.collections_bookmark)),
+              SettingsTile(
+                  title: 'Terms of Service', leading: Icon(Icons.description)),
+              SettingsTile(
+                  title: 'Open source licenses',
+                  leading: Icon(Icons.collections_bookmark)),
             ],
           )
         ],

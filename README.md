@@ -35,10 +35,7 @@ Demo: https://www.youtube.com/watch?v=fctKgZ37ySY
   * Follow event, artist, user
   * Filter main screen by top events, followed and nearby
   * Add/Edit event
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-=======
+
   * Update account info
 # UML diagram
 ![Software_Design](https://user-images.githubusercontent.com/61271015/121544753-a0260380-ca12-11eb-9b58-3cafba77557b.png)
@@ -101,8 +98,7 @@ Demo: https://www.youtube.com/watch?v=fctKgZ37ySY
 
   ### Search page
   <img src="https://user-images.githubusercontent.com/61271015/121924020-307e8400-cd44-11eb-9ba2-8977c23bca9d.jpeg" width="270" height="480" />
->>>>>>> f1e002485473b6f8fccef34fa63928a5ecfc15e9
->>>>>>> 749a234ee4f77ec452ed6154967921d76b519c76
+
 
 # Design patterns
 ## Singleton (Factory Constructor)
