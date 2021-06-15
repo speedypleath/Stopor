@@ -1,6 +1,6 @@
 # Stopor
 Android/IOS application written in Java that helps you find events and organize events.
-
+Demo: https://www.youtube.com/watch?v=fctKgZ37ySY
 # App description
 ## 1. User stories
   1. As a user, I want to be able to search for events
@@ -38,8 +38,17 @@ Android/IOS application written in Java that helps you find events and organize 
   * Update account info
 # UML diagram
 ![Software_Design](https://user-images.githubusercontent.com/61271015/121544753-a0260380-ca12-11eb-9b58-3cafba77557b.png)
-
-## 4. Screens
+## 4. Firestore documents
+  * artists
+  * events
+  * user
+  * following
+  * participation
+## 5. API's used
+  * Facebook Graph API (for synchronizing events)
+  * Spotify API (for synchronizing artists)
+  * Algolia (for indexing search)
+## 6. Screens
   ### News feed 
   <img src="https://user-images.githubusercontent.com/61271015/121922044-43905480-cd42-11eb-8463-d597e2832251.jpeg" width="270" height="480" />
   
