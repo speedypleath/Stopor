@@ -35,8 +35,6 @@ Android/IOS application written in Java that helps you find events and organize 
   * Follow event
   * Filter main screen by default, followed and nearby
   * Add/Edit event
-# UML diagram
-![Software_Design](https://user-images.githubusercontent.com/61271015/121544753-a0260380-ca12-11eb-9b58-3cafba77557b.png)
 
 # Design patterns
 ## Singleton (Factory Constructor)

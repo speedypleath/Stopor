@@ -58,12 +58,19 @@ void Notify(DateTime time,String name,String eventImage) async {
           day: time.subtract(new Duration(days: 1)).day,
           hour:time.hour,
           minute:time.minute,
-          second:time.second,
-          millisecond:time.microsecond,
+          second:
+         time.second,
+          millisecond:
+          time.microsecond,
           timeZone: localTimeZone,
           repeats: false
       ));
-  Timer(Duration(days: 1), () {
+  DateTime initialtime=new DateTime(time.year,time.month,time.subtract(new Duration(days: 1)).day,time.hour,time.minute,time.second,time.microsecond);
+  DateTime now=new DateTime.now();
+  DateTime newtime=new DateTime(now.year,now.month,now.day,now.hour,now.minute,now.second,now.microsecond);
+int finaltime=initialtime.difference(newtime).inDays;
+print(finaltime);
+  Timer(Duration(days: finaltime), () {
     notificationlist.add(name);
   });
   print("Notification End");
