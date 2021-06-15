@@ -3,7 +3,6 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:stopor/auth/authentication_service.dart';
 import 'package:stopor/screens/news_feed.dart';
 import 'package:stopor/screens/search.dart';
@@ -23,7 +22,6 @@ class _State extends State<BottomNav> {
   FirebaseMessaging messaging;
   @override
   void initState() {
-
     String photoURL = context.read<AuthenticationService>().getUser().photoURL;
     var image = photoURL != null
         ? NetworkImage(photoURL)

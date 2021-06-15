@@ -53,7 +53,7 @@ describe("Users", () => {
     it("Can't modify user if it doesn't correspond to authenticated user", async () => {
         const db = getFirestore(ANOTHER_USER);
         const testDoc = db.collection("users").doc("speedypleath");
-        await firebase.assertFails(testDoc.update({ userId: "speedypleath" }));
+        await firebase.assertFails(testDoc.update({ userId: "another" }));
     });
 
     it("Can modify user if it does correspond to authenticated user", async () => {

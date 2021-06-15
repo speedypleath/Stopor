@@ -12,7 +12,7 @@ import 'mapper.dart';
 class DatabaseService {
   DatabaseService._privateConstructor();
   static final DatabaseService _instance =
-  DatabaseService._privateConstructor();
+      DatabaseService._privateConstructor();
   factory DatabaseService() {
     return _instance;
   }
@@ -54,14 +54,14 @@ class DatabaseService {
     List<Artist> artists = [];
     _mapper.setArtist();
     await Future.forEach(snapshot.docs,
-            (QueryDocumentSnapshot participation) async {
-          DocumentSnapshot artist = await firestore
-              .collection("artists")
-              .doc(participation.data()["artistId"])
-              .get();
-          Artist mappedArtist = await _mapper.map(artist.data(), artist.id);
-          artists.add(mappedArtist);
-        });
+        (QueryDocumentSnapshot participation) async {
+      DocumentSnapshot artist = await firestore
+          .collection("artists")
+          .doc(participation.data()["artistId"])
+          .get();
+      Artist mappedArtist = await _mapper.map(artist.data(), artist.id);
+      artists.add(mappedArtist);
+    });
     return artists;
   }
 
@@ -71,7 +71,7 @@ class DatabaseService {
       await getFollowedEventList(uid);
       GeoFirePoint center = geo.point(latitude: latitude, longitude: longitude);
       List<String> followedEvents =
-      _followedEvents.map((e) => e.id).cast<String>().toList();
+          _followedEvents.map((e) => e.id).cast<String>().toList();
       print(followedEvents);
       var query;
       if (pageKey != "") {
@@ -171,7 +171,7 @@ class DatabaseService {
       if (_followedEvents.isEmpty)
         _followedEvents = await getFollowedEventList(uid);
       List<String> followedEvents =
-      _followedEvents.map((e) => e.id).cast<String>().toList();
+          _followedEvents.map((e) => e.id).cast<String>().toList();
       print(followedEvents);
       var events;
       List<Event> eventList = [];
@@ -254,7 +254,7 @@ class DatabaseService {
 
   Future<void> followEventWithId(String eventId, String uid) async {
     DocumentSnapshot snap =
-    await firestore.collection('events').doc(eventId).get();
+        await firestore.collection('events').doc(eventId).get();
     firestore.collection('events').doc(eventId).update({
       "followersCount": FieldValue.increment(1),
     });
@@ -278,7 +278,7 @@ class DatabaseService {
 
   Future<void> followArtist(String artistId, String uid) async {
     DocumentSnapshot snap =
-    await firestore.collection('artists').doc(artistId).get();
+        await firestore.collection('artists').doc(artistId).get();
     _mapper.setArtist();
     Artist artist = await _mapper.map(snap.data(), snap.id);
     _followedArtists.add(artist);
@@ -308,7 +308,7 @@ class DatabaseService {
 
   Future<void> followUser(String followdUserId, String uid) async {
     DocumentSnapshot snap =
-    await firestore.collection('users').doc(followdUserId).get();
+        await firestore.collection('users').doc(followdUserId).get();
     _mapper.setUser();
     User user = await _mapper.map(snap.data(), snap.id);
     _followedUsers.add(user);

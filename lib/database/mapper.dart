@@ -58,7 +58,7 @@ class EventMap implements MapStrategy {
       return new Event(
         id: id,
         description: data["description"],
-        date: DateTime(2020, 9, 17, 17, 30),
+        date: data["date"] != null ? data["date"].toDate() : null,
         name: data["name"],
         eventImage: data["image"] != false
             ? data["image"]

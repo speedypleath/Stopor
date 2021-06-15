@@ -1,9 +1,12 @@
-/*import 'package:algolia/algolia.dart';
+import 'package:algolia/algolia.dart';
 import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:stopor/auth/authentication_service.dart';
 import 'package:stopor/database/database_service.dart';
+import 'package:stopor/models/event.dart';
+import 'package:stopor/screens/view_event.dart';
 import "../extension/string_extension.dart";
+
 import 'package:stopor/util/set_overlay.dart';
 import 'package:provider/provider.dart';
 import '../api_keys.dart';
@@ -31,7 +34,7 @@ class _SearchScreenState extends State<SearchScreen> {
       _searching = true;
     });
 
-   Algolia algolia = APIKeys.algolia;
+    Algolia algolia = APIKeys.algolia;
     AlgoliaQuery query;
     if (_fieldToSearch == "all")
       query = algolia.instance.index('stopor');
@@ -171,28 +174,122 @@ class _SearchScreenState extends State<SearchScreen> {
                     var image = photoURL != null
                         ? NetworkImage(photoURL)
                         : AssetImage("assets/images/default_pfp.jpg");
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundImage: image,
-                      ),
-                      trailing: IconButton(
-                        onPressed: () async {
-                          await _followEntity(snap);
-                        },
-                        icon: Icon(
-                          Icons.star,
-                          color: isFollowed
-                              ? Theme.of(context).accentColor
-                              : Colors.grey,
+                    return GestureDetector(
+                      onTap: () async {
+                        if (snap.data["documentType"] != "event") return;
+                        Event event = await _databaseService
+                            .getEvent(snap.data["objectID"]);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (BuildContext context) => ViewEvent(
+                              event: event,
+                            ),
+                          ),
+                        );
+                      },
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundImage: image,
                         ),
+                        trailing: IconButton(
+                          onPressed: () async {
+                            await _followEntity(snap);
+                          },
+                          icon: Icon(
+                            Icons.star,
+                            color: isFollowed
+                                ? Theme.of(context).accentColor
+                                : Colors.grey,
+                          ),
+                        ),
+                        title: Text(snap.data["name"]),
+                        subtitle: Text(
+                            snap.data["documentType"].toString().capitalize()),
                       ),
-                      title: Text(snap.data["name"]),
-                      subtitle: Text(
-                          snap.data["documentType"].toString().capitalize()),
                     );
                   },
                 ),
     );
   }
 }
-*/
+
+
+
+
+
+
+// added in fork
+
+import 'languages_screen.dart';
+
+class SettingsScreen extends StatefulWidget {
+  @override
+  _SettingsScreenState createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  bool lockInBackground = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Settings UI')),
+      body: SettingsList(
+        sections: [
+          SettingsSection(
+            title: 'Common',
+            tiles: [
+              SettingsTile(
+                title: 'Language',
+                subtitle: 'English',
+                leading: Icon(Icons.language),
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (BuildContext context) => LanguagesScreen()));
+                },
+              ),
+              SettingsTile(title: 'Environment', subtitle: 'Production', leading: Icon(Icons.cloud_queue)),
+            ],
+          ),
+          SettingsSection(
+            title: 'Account',
+            tiles: [
+              SettingsTile(title: 'Phone number', leading: Icon(Icons.phone)),
+              SettingsTile(title: 'Email', leading: Icon(Icons.email)),
+              SettingsTile(title: 'Sign out', leading: Icon(Icons.exit_to_app)),
+            ],
+          ),
+          SettingsSection(
+            title: 'Secutiry',
+            tiles: [
+              SettingsTile.switchTile(
+                title: 'Lock app in background',
+                leading: Icon(Icons.phonelink_lock),
+                switchValue: lockInBackground,
+                onToggle: (bool value) {
+                  setState(() {
+                    lockInBackground = value;
+                  });
+                },
+              ),
+              SettingsTile.switchTile(title: 'Use fingerprint', leading: Icon(Icons.fingerprint), onToggle: (bool value) {}, switchValue: false),
+              SettingsTile.switchTile(
+                title: 'Change password',
+                leading: Icon(Icons.lock),
+                switchValue: true,
+                onToggle: (bool value) {},
+              ),
+            ],
+          ),
+          SettingsSection(
+            title: 'Misc',
+            tiles: [
+              SettingsTile(title: 'Terms of Service', leading: Icon(Icons.description)),
+              SettingsTile(title: 'Open source licenses', leading: Icon(Icons.collections_bookmark)),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+}
