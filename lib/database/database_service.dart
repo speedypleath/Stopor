@@ -39,6 +39,32 @@ class DatabaseService {
     firestore.collection('events').add(event.toJSON());
   }
 
+  void addArtistToEvent(String artistId, String eventId) {
+    firestore.collection("participation").doc(artistId + eventId).set({
+      "artistId": artistId,
+      "eventId": eventId,
+    });
+  }
+
+  Future<List<Artist>> getEventArtists(String eventId) async {
+    QuerySnapshot snapshot = await firestore
+        .collection("participation")
+        .where("eventId", isEqualTo: eventId)
+        .get();
+    List<Artist> artists = [];
+    _mapper.setArtist();
+    await Future.forEach(snapshot.docs,
+        (QueryDocumentSnapshot participation) async {
+      DocumentSnapshot artist = await firestore
+          .collection("artists")
+          .doc(participation.data()["artistId"])
+          .get();
+      Artist mappedArtist = await _mapper.map(artist.data(), artist.id);
+      artists.add(mappedArtist);
+    });
+    return artists;
+  }
+
   Future getNearbyEventList(pageKey, pageSize, uid, latitude, longitude) async {
     try {
       _uid = uid;
@@ -131,47 +157,59 @@ class DatabaseService {
     }
   }
 
+  Future<Event> getEvent(eventId) async {
+    var value = await firestore.collection('events').doc(eventId).get();
+    _mapper.setEvent();
+    if (value.exists)
+      return _mapper.map(value.data(), value.id);
+    else
+      return null;
+  }
+
   Future<List<Event>> getEventList(pageKey, pageSize, uid) async {
     try {
+      if (_followedEvents.isEmpty)
+        _followedEvents = await getFollowedEventList(uid);
       List<String> followedEvents =
           _followedEvents.map((e) => e.id).cast<String>().toList();
       print(followedEvents);
       var events;
-      if (pageKey != "") {
-        var docRef = firestore.collection('events').doc(pageKey);
-        var snapshot = await docRef.get();
-        events = firestore.collection('events');
-
-        if (followedEvents.isNotEmpty)
-          events = events
-              .where("documentId", whereNotIn: followedEvents)
-              .orderBy("documentId");
-
-        events = await events
-            .orderBy("followersCount")
-            .startAfterDocument(snapshot)
-            .limit(pageSize)
-            .get();
-      } else {
-        events = await firestore.collection('events').limit(pageSize).get();
-        print(events);
-        if (followedEvents.isNotEmpty)
+      List<Event> eventList = [];
+      while (eventList.length < pageSize) {
+        if (pageKey != "") {
+          var docRef = firestore.collection('events').doc(pageKey);
+          var snapshot = await docRef.get();
           events = await firestore
               .collection('events')
-              .where("documentId", whereNotIn: followedEvents)
-              .orderBy("documentId")
-              .orderBy("followersCount")
+              .orderBy("followersCount", descending: true)
+              .startAfterDocument(snapshot)
               .limit(pageSize)
               .get();
-        else
+        } else {
           events = await firestore
               .collection('events')
-              .orderBy("followersCount")
+              .orderBy("followersCount", descending: true)
               .limit(pageSize)
               .get();
+        }
+        _mapper.setEvent();
+        var queriedEvents = await _mapper.mapToObjectList<Event>(events.docs);
+        if (queriedEvents.isNotEmpty) {
+          pageKey = queriedEvents.last.id;
+          queriedEvents = queriedEvents
+              .where((event) => !followedEvents.contains(event.id))
+              .toList();
+
+          eventList.insertAll(eventList.length, queriedEvents);
+        } else {
+          queriedEvents = queriedEvents
+              .where((event) => !followedEvents.contains(event.id))
+              .toList();
+
+          eventList.insertAll(eventList.length, queriedEvents);
+          break;
+        }
       }
-      _mapper.setEvent();
-      var eventList = await _mapper.mapToObjectList<Event>(events.docs);
       return eventList;
     } catch (e) {
       print(e.toString());
@@ -193,7 +231,7 @@ class DatabaseService {
       return User(
           email: value.data()["email"],
           id: uid,
-          pfp: value.data()["profilePic"],
+          pfp: value.data()["image"],
           name: value.data()["name"],
           facebookAuthToken: value.data()["authToken"],
           spotifyAuthToken: value.data()["spotifyAuthToken"]);
@@ -217,6 +255,9 @@ class DatabaseService {
   Future<void> followEventWithId(String eventId, String uid) async {
     DocumentSnapshot snap =
         await firestore.collection('events').doc(eventId).get();
+    firestore.collection('events').doc(eventId).update({
+      "followersCount": FieldValue.increment(1),
+    });
     _mapper.setEvent();
     Event event = await _mapper.map(snap.data(), snap.id);
     followEvent(event, uid);

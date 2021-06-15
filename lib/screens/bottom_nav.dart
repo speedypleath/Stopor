@@ -1,9 +1,11 @@
+<<<<<<< HEAD
 import 'package:algolia/algolia.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+=======
+>>>>>>> f1e002485473b6f8fccef34fa63928a5ecfc15e9
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:stopor/auth/authentication_service.dart';
 import 'package:stopor/screens/news_feed.dart';
 import 'package:stopor/screens/search.dart';
@@ -11,9 +13,12 @@ import 'package:stopor/screens/settings.dart';
 import 'package:stopor/util/set_overlay.dart';
 import 'package:provider/provider.dart';
 
+<<<<<<< HEAD
 import '../api_keys.dart';
 import 'notifications.dart';
 
+=======
+>>>>>>> f1e002485473b6f8fccef34fa63928a5ecfc15e9
 class BottomNav extends StatefulWidget {
   @override
   _State createState() => _State();

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import 'package:stopor/models/event.dart';
 import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
-import 'package:stopor/screens/search.dart';
 import 'package:stopor/widgets/event_list.dart';
 import 'package:stopor/widgets/followed_events.dart';
 import 'package:stopor/widgets/nearby_events.dart';

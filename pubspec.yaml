@@ -55,8 +55,11 @@ dependencies:
   dcdg: ^3.1.0
   flutter_search_bar: ^2.1.0
   algolia: ^1.0.1
+<<<<<<< HEAD
   awesome_notifications: 0.0.6+7
   firebase_messaging: ^10.0.0
+=======
+>>>>>>> f1e002485473b6f8fccef34fa63928a5ecfc15e9
   expandable: ^5.0.1
   html: ^0.15.0
   url_launcher: ^6.0.6
