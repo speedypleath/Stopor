@@ -1,4 +1,6 @@
 import 'package:algolia/algolia.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -10,6 +12,7 @@ import 'package:stopor/util/set_overlay.dart';
 import 'package:provider/provider.dart';
 
 import '../api_keys.dart';
+import 'notifications.dart';
 
 class BottomNav extends StatefulWidget {
   @override
@@ -17,8 +20,10 @@ class BottomNav extends StatefulWidget {
 }
 
 class _State extends State<BottomNav> {
+  FirebaseMessaging messaging;
   @override
   void initState() {
+
     String photoURL = context.read<AuthenticationService>().getUser().photoURL;
     var image = photoURL != null
         ? NetworkImage(photoURL)
@@ -48,8 +53,9 @@ class _State extends State<BottomNav> {
 
   final List _screens = [
     NewsFeed(),
-    SearchScreen(),
+    //SearchScreen(),
     Scaffold(),
+    Notifications(),
     SettingsPage()
   ];
 

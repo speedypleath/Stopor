@@ -4,6 +4,7 @@ import 'package:stopor/auth/authentication_service.dart';
 import 'package:stopor/database/database_service.dart';
 import 'package:stopor/models/event.dart';
 import 'package:provider/provider.dart';
+import 'package:stopor/screens/notifications.dart';
 import 'event_card.dart';
 
 class EventList extends StatefulWidget {
@@ -61,6 +62,7 @@ class _EventListState extends State<EventList> {
                 setState(() {
                   _pagingController.itemList.removeAt(index);
                 });
+                Notify(item.date,item.name,item.eventImage);
               },
             )),
       ),

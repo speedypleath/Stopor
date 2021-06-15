@@ -1,0 +1,23 @@
+on: [push, pull_request]
+
+jobs:
+  emulator_test:
+    name: Run security rules unit tests 
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: ~/.cache/firebase/emulators
+          key: ${{ runner.os }}-firebase-emulators-${{ hashFiles('~/.cache/firebase/emulators/**') }}
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "12"
+      - name: Install Firebase emulator
+        run: npm install -g firebase-tools
+      - name: Install dependencies
+        run: npm install
+        working-directory: test/firestore_tests
+      - name: Run tests
+        working-directory: test/firestore_tests
+        run: firebase emulators:exec --only firestore --project stopor-f035c 'npm test' 

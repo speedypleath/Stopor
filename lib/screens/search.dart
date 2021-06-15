@@ -1,4 +1,4 @@
-import 'package:algolia/algolia.dart';
+/*import 'package:algolia/algolia.dart';
 import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:stopor/auth/authentication_service.dart';
@@ -31,7 +31,7 @@ class _SearchScreenState extends State<SearchScreen> {
       _searching = true;
     });
 
-    Algolia algolia = APIKeys.algolia;
+   Algolia algolia = APIKeys.algolia;
     AlgoliaQuery query;
     if (_fieldToSearch == "all")
       query = algolia.instance.index('stopor');
@@ -195,3 +195,4 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 }
+*/
