@@ -1,12 +1,13 @@
 import 'package:algolia/algolia.dart';
 import 'package:bubble_tab_indicator/bubble_tab_indicator.dart';
 import 'package:flutter/material.dart';
+import 'package:settings_ui/settings_ui.dart';
 import 'package:stopor/auth/authentication_service.dart';
 import 'package:stopor/database/database_service.dart';
 import 'package:stopor/models/event.dart';
 import 'package:stopor/screens/view_event.dart';
 import "../extension/string_extension.dart";
-
+import 'languages_screen.dart';
 import 'package:stopor/util/set_overlay.dart';
 import 'package:provider/provider.dart';
 import '../api_keys.dart';
@@ -131,23 +132,23 @@ class _SearchScreenState extends State<SearchScreen> {
       case "event":
         isFollowed
             ? await _databaseService.unfollowEvent(snap.data["objectID"],
-                context.read<AuthenticationService>().getUser().uid)
+            context.read<AuthenticationService>().getUser().uid)
             : await _databaseService.followEventWithId(snap.data["objectID"],
-                context.read<AuthenticationService>().getUser().uid);
+            context.read<AuthenticationService>().getUser().uid);
         break;
       case "artist":
         isFollowed
             ? await _databaseService.unfollowArtist(snap.data["objectID"],
-                context.read<AuthenticationService>().getUser().uid)
+            context.read<AuthenticationService>().getUser().uid)
             : await _databaseService.followArtist(snap.data["objectID"],
-                context.read<AuthenticationService>().getUser().uid);
+            context.read<AuthenticationService>().getUser().uid);
         break;
       default:
         isFollowed
             ? await _databaseService.unfollowUser(snap.data["objectID"],
-                context.read<AuthenticationService>().getUser().uid)
+            context.read<AuthenticationService>().getUser().uid)
             : await _databaseService.followUser(snap.data["objectID"],
-                context.read<AuthenticationService>().getUser().uid);
+            context.read<AuthenticationService>().getUser().uid);
     }
     setState(() {});
     return isFollowed;
@@ -159,57 +160,57 @@ class _SearchScreenState extends State<SearchScreen> {
       appBar: _buildAppBar(),
       body: _searching == true
           ? Center(
-              child: Text("Searching, please wait..."),
-            )
+        child: Text("Searching, please wait..."),
+      )
           : _results.length == 0
-              ? Center(
-                  child: Text("No results found."),
-                )
-              : ListView.builder(
-                  itemCount: _results.length,
-                  itemBuilder: (BuildContext ctx, int index) {
-                    AlgoliaObjectSnapshot snap = _results[index];
-                    String photoURL = snap.data["image"];
-                    bool isFollowed = checkIfFollowed(snap);
-                    var image = photoURL != null
-                        ? NetworkImage(photoURL)
-                        : AssetImage("assets/images/default_pfp.jpg");
-                    return GestureDetector(
-                      onTap: () async {
-                        if (snap.data["documentType"] != "event") return;
-                        Event event = await _databaseService
-                            .getEvent(snap.data["objectID"]);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (BuildContext context) => ViewEvent(
-                              event: event,
-                            ),
-                          ),
-                        );
-                      },
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage: image,
-                        ),
-                        trailing: IconButton(
-                          onPressed: () async {
-                            await _followEntity(snap);
-                          },
-                          icon: Icon(
-                            Icons.star,
-                            color: isFollowed
-                                ? Theme.of(context).accentColor
-                                : Colors.grey,
-                          ),
-                        ),
-                        title: Text(snap.data["name"]),
-                        subtitle: Text(
-                            snap.data["documentType"].toString().capitalize()),
-                      ),
-                    );
-                  },
+          ? Center(
+        child: Text("No results found."),
+      )
+          : ListView.builder(
+        itemCount: _results.length,
+        itemBuilder: (BuildContext ctx, int index) {
+          AlgoliaObjectSnapshot snap = _results[index];
+          String photoURL = snap.data["image"];
+          bool isFollowed = checkIfFollowed(snap);
+          var image = photoURL != null
+              ? NetworkImage(photoURL)
+              : AssetImage("assets/images/default_pfp.jpg");
+          return GestureDetector(
+            onTap: () async {
+              if (snap.data["documentType"] != "event") return;
+              Event event = await _databaseService
+                  .getEvent(snap.data["objectID"]);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (BuildContext context) => ViewEvent(
+                    event: event,
+                  ),
                 ),
+              );
+            },
+            child: ListTile(
+              leading: CircleAvatar(
+                backgroundImage: image,
+              ),
+              trailing: IconButton(
+                onPressed: () async {
+                  await _followEntity(snap);
+                },
+                icon: Icon(
+                  Icons.star,
+                  color: isFollowed
+                      ? Theme.of(context).accentColor
+                      : Colors.grey,
+                ),
+              ),
+              title: Text(snap.data["name"]),
+              subtitle: Text(
+                  snap.data["documentType"].toString().capitalize()),
+            ),
+          );
+        },
+      ),
     );
   }
 }
@@ -221,7 +222,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
 // added in fork
 
-import 'languages_screen.dart';
+
 
 class SettingsScreen extends StatefulWidget {
   @override

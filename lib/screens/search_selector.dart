@@ -70,7 +70,7 @@ class ArtistsSelect extends SearchDelegate<String> {
                       itemCount: snapshot.data.hits.length,
                       itemBuilder: (context, index) {
                         final AlgoliaObjectSnapshot result =
-                            snapshot.data.hits[index];
+                        snapshot.data.hits[index];
                         String photoURL = result.data["image"];
                         var image = photoURL != null
                             ? NetworkImage(photoURL)
