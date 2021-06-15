@@ -69,6 +69,8 @@ void Notify(DateTime time,String name,String eventImage) async {
   DateTime now=new DateTime.now();
   DateTime newtime=new DateTime(now.year,now.month,now.day,now.hour,now.minute,now.second,now.microsecond);
 int finaltime=initialtime.difference(newtime).inDays;
+print(initialtime);
+print(newtime);
 print(finaltime);
   Timer(Duration(days: finaltime), () {
     notificationlist.add(name);
