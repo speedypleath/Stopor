@@ -1,5 +1,5 @@
 # Stopor
-Android/IOS application written in Java that helps you find events and organize events.
+Android/IOS application written in Flutter that helps you find events and organize events.
 Demo: https://www.youtube.com/watch?v=fctKgZ37ySY
 # App description
 ## 1. User stories
