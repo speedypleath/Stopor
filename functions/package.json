@@ -24,7 +24,7 @@
     "geofirex": "^0.1.0",
     "latlon-geohash": "^2.0.0",
     "ngeohash": "^0.6.3",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "^3.2.10",
     "rxjs": "^6.6.7"
   },
   "devDependencies": {
